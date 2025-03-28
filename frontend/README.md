@@ -1,12 +1,30 @@
-# React + Vite
+# FANCY - Modern E-commerce Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+FANCY is a full-stack e-commerce platform built with the MERN stack (MongoDB, Express.js, React, Node.js) and enhanced with modern tools and libraries for a superior shopping experience.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Responsive Design**: Fully responsive layout that works seamlessly on desktop, tablet, and mobile devices
+- **Modern UI/UX**: Clean and intuitive interface with smooth animations and transitions
+- **Shopping Cart**: Real-time cart management with sliding drawer interface
+- **User Authentication**: Secure user authentication and authorization
+- **Product Management**: Comprehensive product browsing and filtering capabilities
+- **Search Functionality**: Dynamic product search with instant results
+- **Responsive Navigation**: Hamburger menu for mobile and full navigation for desktop
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Frontend
+
+- React.js
+- Tailwind CSS for styling
+- React Router for navigation
+- React Icons for UI elements
+- Vite as build tool
+
+### Backend
+
+- Node.js
+- Express.js
+- MongoDB for database
+- JWT for authentication
