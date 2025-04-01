@@ -7,6 +7,7 @@ import {
 import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
 import SearchBar from "./SearchBar";
+import CartDrawer from "../Layout/CartDrawer";
 
 const Navbar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -89,6 +90,10 @@ const Navbar = () => {
           </button>
         </div>
       </nav>
+
+      <CartDrawer drawerOpen={drawerOpen} toggleCartDrawer={toggleCartDrawer} />
+
+      {/* add a CartDrawer Component */}
 
       {/* Add mobile navigation drawer */}
       <div
