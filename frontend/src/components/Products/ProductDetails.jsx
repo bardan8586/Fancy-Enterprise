@@ -1,4 +1,6 @@
 import { act, useEffect, useState } from "react";
+import { toast } from "sonner";
+import ProductGrid from "./ProductGrid";
 
 const selectedProduct = {
   name: "Stylish Jacket",
@@ -21,11 +23,42 @@ const selectedProduct = {
   ],
 };
 
+const similarProducts = [
+  {
+    _id: "1",
+    name: "Product 1",
+    price: 100,
+    images: [{ url: "https://picsum.photos/500/500?random=3" }],
+  },
+
+  {
+    _id: "2",
+    name: "Product 2",
+    price: 100,
+    images: [{ url: "https://picsum.photos/500/500?random=4" }],
+  },
+
+  {
+    _id: "3",
+    name: "Product 3",
+    price: 100,
+    images: [{ url: "https://picsum.photos/500/500?random=5" }],
+  },
+
+  {
+    _id: "4",
+    name: "Product 4",
+    price: 100,
+    images: [{ url: "https://picsum.photos/500/500?random=6" }],
+  },
+];
+
 const ProductDetails = () => {
   const [mainImage, setMainImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
     if (selectedProduct?.images?.length > 0) {
@@ -38,6 +71,24 @@ const ProductDetails = () => {
       setQuantity((prev) => prev + 1);
     }
     if (action == "minus" && quantity > 1) setQuantity((prev) => prev - 1);
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedSize || !selectedColor) {
+      toast.error("Please select size and color before adding to cart", {
+        duration: 2000,
+      });
+      return;
+    }
+
+    setIsButtonDisabled(true);
+
+    setTimeout(() => {
+      toast.success("Prodcut Added to Cart", {
+        duration: 2000,
+      });
+      setIsButtonDisabled(false);
+    }, 500);
   };
 
   return (
@@ -110,7 +161,7 @@ const ProductDetails = () => {
                         : "border-gray-300"
                     }`}
                     style={{
-                      backgroundColor: color.toLocaleLowerCase(),
+                      backgroundColor: color,
                       filter: "brightness(0.5)",
                     }}
                   ></button>
@@ -155,7 +206,46 @@ const ProductDetails = () => {
                 </button>
               </div>
             </div>
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={handleAddToCart}
+              disabled={isButtonDisabled}
+              className={`w-full px-6 py-2 mb-4 text-white bg-black rounded ${
+                isButtonDisabled
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-900"
+              }`}
+            >
+              {isButtonDisabled ? "Adding..." : "Add to Cart"}
+            </button>
+
+            {/* Charactersistics section */}
+            <div className="mt-10 text-gray-700">
+              <h3 className="mb-4 text-xl font-bold">Characteristics</h3>
+              <table className="w-full text-sm text-left text-gray-600">
+                <tbody>
+                  <tr>
+                    <td className="py-1">Brand</td>
+                    <td className="py-1">{selectedProduct.brand}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-1">Material</td>
+                    <td className="py-1">{selectedProduct.material}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
+
+        {/* You may also like */}
+        <div className="mt-20">
+          <h2 className="mb-4 text-2xl font-medium text-center">
+            You may also like
+          </h2>
+          {/* Make a separate component for product grid and pass it here */}
+          <ProductGrid products={similarProducts} />
         </div>
       </div>
     </div>
