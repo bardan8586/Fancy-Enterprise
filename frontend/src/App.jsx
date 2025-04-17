@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Checkout from "./components/Cart/Checkout";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import MyOrdersPage from "./pages/MyOrdersPage";
 
 const App = () => {
   return (
@@ -26,6 +27,8 @@ const App = () => {
             path="order-confirmation"
             element={<OrderConfirmationPage />}
           />
+
+          <Route path="my-orders" element={<MyOrdersPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
