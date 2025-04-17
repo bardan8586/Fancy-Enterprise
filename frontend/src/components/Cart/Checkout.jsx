@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import PayPalButton from "./PayPalButton";
 
 const cart = {
   products: [
@@ -22,6 +24,7 @@ const cart = {
 };
 
 const Checkout = () => {
+  const navigate = useNavigate();
   const [checkoutId, setCheckoutId] = useState(null);
   const [shippingAddress, setShhippingAddress] = useState({
     firstName: "",
@@ -38,6 +41,11 @@ const Checkout = () => {
 
     //this will be an async function and it will fetch the api checkout function from backend
     setCheckoutId(123);
+  };
+
+  const handlePaymentSuccess = () => {
+    console.log("Payment Successful");
+    navigate("/order-confirmation");
   };
 
   return (
@@ -188,10 +196,57 @@ const Checkout = () => {
             ) : (
               <div>
                 <h3>Pay with Paypal</h3>
+                <PayPalButton
+                  amount={100}
+                  onSuccess={handlePaymentSuccess}
+                  onError={(error) => alert("Payment failed, please try again")}
+                />
               </div>
+              // Add a PayPal button component here
             )}
           </div>
         </form>
+      </div>
+
+      {/* Right section */}
+      <div className="p-6 rounded-lg bg-gray-50">
+        <h3 className="mb-4 text-lg">Order Summary</h3>
+        <div className="py-4 mb-4 border-t">
+          {cart.products.map((product, index) => (
+            <div
+              key={index}
+              className="flex items-start justify-between py-2 border-b"
+            >
+              <div className="flex items-start">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="object-cover w-20 h-24 mr-4"
+                />
+                <div>
+                  <h3 className="text-lg">{product.name}</h3>
+                  <p className="text-gray-500">Size: {product.size}</p>
+                  <p className="text-gray-500">Color: {product.color}</p>
+                </div>
+              </div>
+              <p>${product.price?.toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between mb-4 text-lg">
+          <p>Subtotal</p>
+          <p>${cart.totalPrice?.toLocaleString()}</p>
+        </div>
+
+        <div className="flex items-center justify-between mb-4 text-lg">
+          <p>Shipping</p>
+          <p>Free</p>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 mt-4 text-lg border-t">
+          <p>Total</p>
+          <p>${cart.totalPrice?.toLocaleString()}</p>
+        </div>
       </div>
     </div>
   );
