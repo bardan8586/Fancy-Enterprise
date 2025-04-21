@@ -5,7 +5,7 @@ const ProductGrid = ({ products }) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-col-2 lg:grid-cols-4">
       {products.map((product, index) => (
-        <Link to={`/product/${product._id}`}>
+        <Link key={index} to={`/product/${product._id}`}>
           <div className="p-4 bg-white rounded-lg">
             <div className="w-full mb-4 h-96">
               <img
