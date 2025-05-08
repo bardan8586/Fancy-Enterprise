@@ -13,13 +13,17 @@ const { protect } = require("../middleware/authMiddleware");
 // @access Public
 
 router.post("/register", async (req, res) => {
+  console.log("Request received at /register"); // Log when the route is hit
+  console.log("Request body:", req.body); // Log the incoming request body
   const { name, email, password } = req.body;
   try {
     let user = await User.findOne({ email });
     if (user) return res.status(400).json({ message: "User Already exists" });
 
     user = new User({ name, email, password });
-    await user.save();
+    console.log(user, "user");
+    //return;
+    await user.save(); //it saves the data into mongodb datbase as a User Collection
 
     //create JWT payload
     const payload = { user: { id: user._id, role: user.role } };

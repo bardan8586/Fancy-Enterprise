@@ -66,6 +66,7 @@ router.post("/", protect, admin, async (req, res) => {
 // @desc Update an existing product ID
 // @access Private/Admin
 router.put("/:id", protect, admin, async (req, res) => {
+  console.log(req.params.id, "id");
   try {
     const {
       name,
