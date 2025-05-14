@@ -8,6 +8,8 @@ const router = express.Router();
 // @desc Create a new Product
 // @access Private/Admin
 router.post("/", protect, admin, async (req, res) => {
+  // console.log(req.user);
+  // return;
   try {
     const {
       name,
@@ -29,6 +31,7 @@ router.post("/", protect, admin, async (req, res) => {
       dimensions,
       weight,
       sku,
+      user,
     } = req.body;
 
     const product = new Product({

@@ -8,7 +8,7 @@ const cartItemSchema = new mongoose.Schema(
       required: true,
     },
     name: String,
-    images: String,
+    image: String,
     price: String,
     size: String,
     color: String,
@@ -31,7 +31,7 @@ const cartSchema = new mongoose.Schema(
       type: String,
     },
 
-    prodcuts: [cartItemSchema],
+    products: [cartItemSchema],
     totalPrice: {
       type: Number,
       required: true,
