@@ -38,28 +38,28 @@ const Navbar = () => {
         {/* center navigation link */}
         <div className="hidden space-x-4 md:flex">
           <Link
-            to="/collections/all"
+            to="/collections/all?gender=Men"
             className="text-sm font-medium text-gray-700 uppercase hover:text-black "
           >
             Men
           </Link>
 
           <Link
-            to="#"
+            to="/collections/all?gender=Women"
             className="text-sm font-medium text-gray-700 uppercase hover:text-black "
           >
             Women
           </Link>
 
           <Link
-            to="#"
+            to="/collections/all?category=Top Wear"
             className="text-sm font-medium text-gray-700 uppercase hover:text-black "
           >
             Top Wear
           </Link>
 
           <Link
-            to="#"
+            to="/collections/all?category=Bottom Wear"
             className="text-sm font-medium text-gray-700 uppercase hover:text-black "
           >
             Bottom Wear
@@ -121,19 +121,28 @@ const Navbar = () => {
           <h2 className="mb-4 text-xl font-semibold">Menu</h2>
           <nav className="space-y-4">
             <Link
-              to="#"
+              to="/collections/all?gender=Men"
               onClick={toggleNavDrawer}
               className="block text-gray-600 hover:text-black"
             >
               Men
             </Link>
-            <Link to="#" className="block text-gray-600 hover:text-black">
+            <Link
+              to="/collections/all?gender=Women"
+              className="block text-gray-600 hover:text-black"
+            >
               Women
             </Link>
-            <Link to="#" className="block text-gray-600 hover:text-black">
+            <Link
+              to="/collections/all?category=Top Wear"
+              className="block text-gray-600 hover:text-black"
+            >
               Top Wear
             </Link>
-            <Link to="#" className="block text-gray-600 hover:text-black">
+            <Link
+              to="/collections/all?category=Bottom Wear"
+              className="block text-gray-600 hover:text-black"
+            >
               Bottom Wear
             </Link>
           </nav>

@@ -201,7 +201,7 @@ const FilterSidebar = () => {
           <div key={brand} className="flex items-center mb-1">
             <input
               type="checkbox"
-              name="size"
+              name="brand"
               value={brand}
               onChange={handleFilterChange}
               checked={filters.brand.includes(brand)}

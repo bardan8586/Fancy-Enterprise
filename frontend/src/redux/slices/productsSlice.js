@@ -39,6 +39,28 @@ export const fetchProductByFilters = createAsyncThunk(
   }
 );
 
+//make a async thunk to fetch a single product by ID:
+export const fetchProductDetails = createAsyncThunk(
+  "products/fetchProductDetails",
+  async (id) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/${id}`
+    );
+    return response.data;
+  }
+);
+
+// make async thunk to fetch similar products to the selected one
+export const fetchSimilarProducts = createAsyncThunk(
+  "products/fetchSimilarProducts",
+  async ({ id }) => {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/products/similar/${id}`
+    );
+    return response.data;
+  }
+);
+
 const productsSlice = createSlice({
   name: "products",
   initialState: {
@@ -94,6 +116,38 @@ const productsSlice = createSlice({
         state.products = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchProductByFilters.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
+      //hanlde fetching single product details
+      .addCase(fetchProductDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(fetchProductDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+
+      .addCase(fetchProductDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+
+      //hanlde fetching similar product
+      .addCase(fetchSimilarProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+
+      .addCase(fetchSimilarProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.similarProducts = action.payload;
+      })
+
+      .addCase(fetchSimilarProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       });

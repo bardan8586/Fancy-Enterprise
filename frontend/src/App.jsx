@@ -18,6 +18,7 @@ import EditProductPage from "./components/Admin/EditProductPage";
 import store from "./redux/store";
 import { Provider } from "react-redux";
 import CollectionPage from "./pages/CollectionPage";
+import ProductDetails from "./components/Products/ProductDetails";
 
 const App = () => {
   return (
@@ -36,6 +37,9 @@ const App = () => {
               path="collections/:collection"
               element={<CollectionPage />}
             />
+
+            {/* Route for individual product id */}
+            <Route path="product/:id" element={<ProductDetails />} />
             {/* Route for checkout */}
             <Route path="checkout" element={<Checkout />} />
             <Route

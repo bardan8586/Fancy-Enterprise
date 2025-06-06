@@ -5,6 +5,7 @@ import ProductGrid from "../components/Products/ProductGrid";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductByFilters } from "../redux/slices/productsSlice";
+import SortOptions from "../components/Products/SortOptions";
 
 const CollectionPage = () => {
   const [searchParams] = useSearchParams();
@@ -67,6 +68,7 @@ const CollectionPage = () => {
       <div className="flex-grow p-4">
         <h2 className="mb-4 text-2xl uppercase">All Collection</h2>
         {/* Add sortOptions component */}
+        <SortOptions />
         {/* Product Grid */}
         <ProductGrid products={products} />
       </div>
