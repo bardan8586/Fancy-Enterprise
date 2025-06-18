@@ -2,12 +2,21 @@ import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import CartContents from "../Cart/CartContents";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
   const navigate = useNavigate();
+  const { user, guestId } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+  const userId = user ? user._id : null;
+
   const handleCheckout = () => {
     toggleCartDrawer();
-    navigate("/checkout");
+    if (!user) {
+      navigate("/login?redirect=checkout");
+    } else {
+      navigate("/checkout");
+    }
   };
   return (
     <div
@@ -25,7 +34,7 @@ const CartDrawer = ({ drawerOpen, toggleCartDrawer }) => {
       <div className="flex-grow p-4 overflow-y-auto">
         <h2 className="mb-4 text-xl font-semibold">Shopping Cart</h2>
         {/* Pass a CartContents component here */}
-        <CartContents />
+        <CartContents cart={cart} userId={userId} guestId={guestId} />
       </div>
 
       {/* Checkout button fixed at bottom */}

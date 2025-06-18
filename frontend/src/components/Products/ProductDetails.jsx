@@ -7,13 +7,16 @@ import {
   fetchProductDetails,
   fetchSimilarProducts,
 } from "../../redux/slices/productsSlice";
+import { addToCart } from "../../redux/slices/cartSlice";
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
-  const { selectedProduct, similarProducts } = useSelector(
+  const { selectedProduct, similarProducts, loading, error } = useSelector(
     (state) => state.products
   );
 
+  //get the user and guest id from the auth reducer
+  const { user, guestId } = useSelector((state) => state.auth);
   const [mainImage, setMainImage] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
@@ -54,13 +57,43 @@ const ProductDetails = ({ productId }) => {
 
     setIsButtonDisabled(true);
 
-    setTimeout(() => {
-      toast.success("Prodcut Added to Cart", {
-        duration: 2000,
+    //now instead of timeout, dispatch addToCart. To dispatch this, we need to make a cartSlice
+    // that will create asyncThunk for API calls and along with helper function and cart state
+
+    dispatch(
+      addToCart({
+        productId: productFetchId,
+        quantity,
+        size: selectedSize,
+        color: selectedColor,
+        guestId,
+        userId: user?._id,
+      })
+    )
+      .then(() => {
+        toast.success("Product added to cart!", {
+          duration: 1000,
+        });
+      })
+      .finally(() => {
+        setIsButtonDisabled(false);
       });
-      setIsButtonDisabled(false);
-    }, 500);
+
+    // setTimeout(() => {
+    //   toast.success("Prodcut Added to Cart", {
+    //     duration: 2000,
+    //   });
+    //   setIsButtonDisabled(false);
+    // }, 500);
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   return (
     <div className="py-6">
@@ -219,7 +252,11 @@ const ProductDetails = ({ productId }) => {
               You may also like
             </h2>
             {/* Make a separate component for product grid and pass it here */}
-            <ProductGrid products={similarProducts} />
+            <ProductGrid
+              products={similarProducts}
+              loading={loading}
+              error={error}
+            />
           </div>
         </div>
       )}

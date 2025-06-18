@@ -3,6 +3,7 @@ import MyOrdersPage from "./MyOrdersPage";
 import { logout } from "../redux/slices/authSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { clearCart } from "../redux/slices/cartSlice";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -17,6 +18,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     navigate("/login");
   };
   console.log(user);

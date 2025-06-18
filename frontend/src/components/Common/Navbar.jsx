@@ -16,6 +16,12 @@ const Navbar = () => {
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
+  const { cart } = useSelector((state) => state.cart);
+
+  //get the cart item count from the cart
+  const cartItemCount =
+    cart?.products?.reduce((total, product) => total + product.quantity, 0) ||
+    0;
 
   const toggleNavDrawer = () => {
     setNavDrawerOpen(!navDrawerOpen);
@@ -83,9 +89,11 @@ const Navbar = () => {
             className="relative hover:text-black"
           >
             <HiOutlineShoppingBag className="w-6 h-6 text-gray-700" />
-            <span className="absolute top-0 right-0 inline-flex justify-center px-2 py-1 text-xs font-bold text-red-100 transform translate-x-1/2 -translate-y-1/2 rounded-full bg-ecomm-purple">
-              0
-            </span>
+            {cartItemCount > 0 && (
+              <span className="absolute top-0 right-0 inline-flex justify-center px-2 py-1 text-xs font-bold text-red-100 transform translate-x-1/2 -translate-y-1/2 rounded-full bg-ecomm-purple">
+                {cartItemCount}
+              </span>
+            )}
           </button>
 
           {/* Search Icon */}
@@ -104,7 +112,7 @@ const Navbar = () => {
 
       {/* add a CartDrawer Component */}
 
-      {/* Add mobile navigation drawer */}
+      {/* mobile navigation */}
       <div
         className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform transition-transform duration-300 z-50 ${
           navDrawerOpen ? "translate-x-0" : "-translate-x-full"
@@ -129,18 +137,21 @@ const Navbar = () => {
             </Link>
             <Link
               to="/collections/all?gender=Women"
+              onClick={toggleNavDrawer}
               className="block text-gray-600 hover:text-black"
             >
               Women
             </Link>
             <Link
               to="/collections/all?category=Top Wear"
+              onClick={toggleNavDrawer}
               className="block text-gray-600 hover:text-black"
             >
               Top Wear
             </Link>
             <Link
               to="/collections/all?category=Bottom Wear"
+              onClick={toggleNavDrawer}
               className="block text-gray-600 hover:text-black"
             >
               Bottom Wear
