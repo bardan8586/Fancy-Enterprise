@@ -10,6 +10,7 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const { cart, loading, error } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
+  console.log(user, "user");
 
   const [checkoutId, setCheckoutId] = useState(null);
   const [shippingAddress, setShippingAddress] = useState({
@@ -31,6 +32,13 @@ const Checkout = () => {
 
   const handleCreateCheckout = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      alert("Authentication failed. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     if (cart && cart.products.length > 0) {
       const res = await dispatch(
         createCheckout({
@@ -38,33 +46,55 @@ const Checkout = () => {
           shippingAddress,
           paymentMethod: "Paypal",
           totalPrice: cart.totalPrice,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
       );
       if (res.payload && res.payload._id) {
-        setCheckoutId(res.payload._id); // Set checkout ID if chekout was successful
+        setCheckoutId(res.payload._id); // Set checkout ID if checkout was successful
       }
     }
   };
 
   const handlePaymentSuccess = async (details) => {
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      alert("Authentication failed. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       const response = await axios.put(
         `${import.meta.env.VITE_BACKEND_URL}/api/checkout/${checkoutId}/pay`,
         { paymentStatus: "paid", paymentDetails: details },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       await handleFinalizeCheckout(checkoutId); // Finalize checkout if payment is successful
     } catch (error) {
-      console.error(error);
+      if (error.response && error.response.status === 401) {
+        alert("Session expired. Please log in again.");
+        navigate("/login");
+      } else {
+        console.error(error);
+      }
     }
   };
 
   const handleFinalizeCheckout = async (checkoutId) => {
+    const token = localStorage.getItem("userToken");
+    if (!token) {
+      alert("Authentication failed. Please log in again.");
+      navigate("/login");
+      return;
+    }
+
     try {
       await axios.post(
         `${
@@ -73,13 +103,18 @@ const Checkout = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
       navigate("/order-confirmation");
     } catch (error) {
-      console.error(error);
+      if (error.response && error.response.status === 401) {
+        alert("Session expired. Please log in again.");
+        navigate("/login");
+      } else {
+        console.error(error);
+      }
     }
   };
 

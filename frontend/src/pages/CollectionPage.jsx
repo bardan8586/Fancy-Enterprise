@@ -1,58 +1,53 @@
 import { useEffect, useRef, useState } from "react";
 import { FaFilter } from "react-icons/fa";
 import FilterSidebar from "../components/Products/FilterSidebar";
+import SortOptions from "../components/Products/SortOptions";
 import ProductGrid from "../components/Products/ProductGrid";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProductByFilters } from "../redux/slices/productsSlice";
-import SortOptions from "../components/Products/SortOptions";
-
+import { fetchProductsByFilters } from "../redux/slices/productsSlice";
 const CollectionPage = () => {
-  const [searchParams] = useSearchParams();
   const { collection } = useParams();
-
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
-
   const { products, loading, error } = useSelector((state) => state.products);
-
   const queryParams = Object.fromEntries([...searchParams]);
 
+  const sidebarRef = useRef(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const sidebarRef = useRef(null); //pass default as null
+  useEffect(() => {
+    dispatch(fetchProductsByFilters({ collection, ...queryParams }));
+  }, [dispatch, collection, searchParams]);
 
-  const toggleSidbar = () => {
+  const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleClickOutside = (e) => {
+    // Close sidebar if clicked outside
     if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
       setIsSidebarOpen(false);
     }
   };
 
   useEffect(() => {
-    dispatch(fetchProductByFilters({ collection, ...queryParams }));
-  }, [dispatch, collection, searchParams]);
-
-  useEffect(() => {
-    // add event listener for clicks
+    // Add Event listner for clicks
     document.addEventListener("mousedown", handleClickOutside);
-    //clean even listener on unmount
+    // clean event listener
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  });
+  }, []);
 
   return (
     <div className="flex flex-col lg:flex-row">
-      {/* Mobile Filter Button */}
+      {/* Mobile Filter button */}
       <button
-        onClick={toggleSidbar}
+        onClick={toggleSidebar}
         className="flex items-center justify-center p-2 border lg:hidden"
       >
-        <FaFilter className="mr-2" />
-        Filters
+        <FaFilter className="mr-2" /> Filters
       </button>
 
       {/* Filter Sidebar */}
@@ -60,20 +55,20 @@ const CollectionPage = () => {
         ref={sidebarRef}
         className={`${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } w-64 bg-white fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:static lg:translate-x-0 overflow-y-auto `} //add overflow-y-auto later after sidebar content
+        } fixed inset-y-0 z-50 left-0 w-64 bg-white overflow-y-auto transition-transform duration-300 lg:static lg:translate-x-0`}
       >
         <FilterSidebar />
       </div>
-
       <div className="flex-grow p-4">
         <h2 className="mb-4 text-2xl uppercase">All Collection</h2>
-        {/* Add sortOptions component */}
+
+        {/* Sort Options */}
         <SortOptions />
+
         {/* Product Grid */}
-        <ProductGrid products={products} />
+        <ProductGrid products={products} loading={loading} error={error} />
       </div>
     </div>
   );
 };
-
 export default CollectionPage;
