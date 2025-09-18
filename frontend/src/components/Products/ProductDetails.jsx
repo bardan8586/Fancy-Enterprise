@@ -8,6 +8,7 @@ import {
   fetchSimilarProducts,
 } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
+import { getDisplayImages, getFallbackByCategory } from "../../utils/imageUtils";
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
@@ -34,11 +35,13 @@ const ProductDetails = ({ productId }) => {
     }
   }, [dispatch, productFetchId]);
 
+  const displayImages = getDisplayImages(selectedProduct);
+
   useEffect(() => {
-    if (selectedProduct?.images?.length > 0) {
-      setMainImage(selectedProduct.images[0].url);
+    if (displayImages?.length > 0) {
+      setMainImage(displayImages[0].url);
     }
-  }, [selectedProduct]);
+  }, [selectedProduct, displayImages]);
 
   const handleQuantityChange = (action) => {
     if (action == "plus") {
@@ -103,7 +106,7 @@ const ProductDetails = ({ productId }) => {
             {/* left thumbnails */}
             <div className="flex-col hidden mr-6 space-y-4 md:flex">
               {/* pass selectedProduct */}
-              {selectedProduct.images.map((image, index) => (
+              {displayImages.map((image, index) => (
                 <img
                   key={index}
                   src={image.url}
@@ -113,6 +116,11 @@ const ProductDetails = ({ productId }) => {
                     mainImage === image.url ? "border-black" : "border-gray-300"
                   }`}
                   onClick={() => setMainImage(image.url)}
+                  onError={(e) => {
+                    e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);
+                  }}
+                  loading="lazy"
+                  decoding="async"
                 />
               ))}
             </div>
@@ -124,19 +132,29 @@ const ProductDetails = ({ productId }) => {
                   src={mainImage}
                   alt="Main Product"
                   className="object-cover w-full h-auto rounded-lg"
+                  onError={(e) => {
+                    e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);
+                  }}
+                  loading="eager"
+                  decoding="async"
                 />
               </div>
             </div>
 
             {/* Mobile Thumbnails */}
             <div className="flex mb-4 space-x-4 md:hidden overscroll-x-auto">
-              {selectedProduct.images.map((image, index) => (
+              {displayImages.map((image, index) => (
                 <img
                   key={index}
                   src={image.url}
                   alt={image.altText || `Thumbnail ${index}`}
                   className="object-cover w-20 h-20 border"
                   onClick={() => setMainImage(image.url)}
+                  onError={(e) => {
+                    e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);
+                  }}
+                  loading="lazy"
+                  decoding="async"
                 />
               ))}
             </div>

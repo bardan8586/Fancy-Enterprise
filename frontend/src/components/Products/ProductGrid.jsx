@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { getDisplayImage, getFallbackByCategory } from "../../utils/imageUtils";
 
 const ProductGrid = ({ products, loading, error }) => {
   if (loading) {
@@ -15,9 +16,14 @@ const ProductGrid = ({ products, loading, error }) => {
           <div className="p-4 bg-white rounded-lg">
             <div className="w-full mb-4 h-96">
               <img
-                src={product.images[0].url}
-                alt={product.images[0].altText || product.name}
+                src={getDisplayImage(product)}
+                alt={product.name}
                 className="object-cover w-full h-full rounded-lg"
+                loading="lazy"
+                decoding="async"
+                onError={(e) => {
+                  e.currentTarget.src = getFallbackByCategory(product?.category, product?.gender);
+                }}
               />
             </div>
             <h3 className="mb-2 text-sm">{product.name}</h3>
