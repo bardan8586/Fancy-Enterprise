@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { getDisplayImage, getFallbackByCategory } from "../../utils/imageUtils";
+import { getDisplayImage, getFallbackByCategory, buildSrcSet, defaultSizes } from "../../utils/imageUtils";
 
 const ProductGrid = ({ products, loading, error }) => {
   if (loading) {
@@ -21,6 +21,8 @@ const ProductGrid = ({ products, loading, error }) => {
                 className="object-cover w-full h-full rounded-lg"
                 loading="lazy"
                 decoding="async"
+                srcSet={buildSrcSet(getDisplayImage(product))}
+                sizes={defaultSizes}
                 onError={(e) => {
                   e.currentTarget.src = getFallbackByCategory(product?.category, product?.gender);
                 }}

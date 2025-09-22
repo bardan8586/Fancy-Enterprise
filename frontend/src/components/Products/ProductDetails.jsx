@@ -8,7 +8,7 @@ import {
   fetchSimilarProducts,
 } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
-import { getDisplayImages, getFallbackByCategory } from "../../utils/imageUtils";
+import { getDisplayImages, getFallbackByCategory, buildSrcSet, defaultSizes } from "../../utils/imageUtils";
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
@@ -121,6 +121,8 @@ const ProductDetails = ({ productId }) => {
                   }}
                   loading="lazy"
                   decoding="async"
+                  srcSet={buildSrcSet(image.url)}
+                  sizes="80px"
                 />
               ))}
             </div>
@@ -137,6 +139,8 @@ const ProductDetails = ({ productId }) => {
                   }}
                   loading="eager"
                   decoding="async"
+                  srcSet={buildSrcSet(mainImage)}
+                  sizes={defaultSizes}
                 />
               </div>
             </div>
@@ -155,6 +159,8 @@ const ProductDetails = ({ productId }) => {
                   }}
                   loading="lazy"
                   decoding="async"
+                  srcSet={buildSrcSet(image.url)}
+                  sizes="80px"
                 />
               ))}
             </div>
