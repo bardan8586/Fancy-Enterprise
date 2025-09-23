@@ -152,7 +152,9 @@ const ProductDetails = ({ productId }) => {
                   key={index}
                   src={image.url}
                   alt={image.altText || `Thumbnail ${index}`}
-                  className="object-cover w-20 h-20 border"
+                  className={`object-cover w-20 h-20 border rounded-lg cursor-pointer ${
+                    mainImage === image.url ? "border-black" : "border-gray-300"
+                  }`}
                   onClick={() => setMainImage(image.url)}
                   onError={(e) => {
                     e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);

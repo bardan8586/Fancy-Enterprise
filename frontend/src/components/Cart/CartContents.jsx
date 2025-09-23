@@ -1,5 +1,6 @@
 import { RiDeleteBin3Line } from "react-icons/ri";
 import { useDispatch } from "react-redux";
+import { getFallbackByCategory } from "../../utils/imageUtils";
 
 import {
   removeFromCart,
@@ -39,9 +40,14 @@ const CartContents = ({ cart, userId, guestId }) => {
         >
           <div className="flex items-center">
             <img
-              src={product.image}
+              src={product.image || getFallbackByCategory(product.category, product.gender)}
               alt={product.name}
               className="object-cover w-20 h-24 mr-4 rounded"
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                e.currentTarget.src = getFallbackByCategory(product.category, product.gender);
+              }}
             />
 
             <div className="ml-4">

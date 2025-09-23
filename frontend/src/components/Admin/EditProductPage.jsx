@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getFallbackByCategory } from "../../utils/imageUtils";
 
 const EditProductPage = () => {
   const navigate = useNavigate();
@@ -20,10 +21,12 @@ const EditProductPage = () => {
     gender: "",
     images: [
       {
-        url: "https://picsum.photos/150?random=1",
+        url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=450&q=75",
+        altText: "Product Image 1"
       },
       {
-        url: "https://picsum.photos/150?random=2",
+        url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=450&q=75",
+        altText: "Product Image 2"
       },
     ],
   });
@@ -158,6 +161,11 @@ const EditProductPage = () => {
                   src={image.url}
                   alt={image.altText || "Product Image"}
                   className="object-cover w-20 h-20 rounded-md shadow-md"
+                  loading="lazy"
+                  decoding="async"
+                  onError={(e) => {
+                    e.currentTarget.src = getFallbackByCategory(productData.category, productData.gender);
+                  }}
                 />
               </div>
             ))}
