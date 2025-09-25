@@ -29,7 +29,8 @@ const shouldReplace = (url) => {
   try {
     const u = String(url).toLowerCase();
     if (u.includes("picsum.photos")) return true;
-    if (u.includes("images.unsplash.com") || u.includes("unsplash.com")) return true;
+    // TEMPORARILY DISABLE UNSPLASH REPLACEMENT TO SHOW REAL IMAGES
+    // if (u.includes("images.unsplash.com") || u.includes("unsplash.com")) return true;
     if (u.endsWith(".svg")) return true; // avoid text svg placeholders
   } catch (_) {}
   return false;
