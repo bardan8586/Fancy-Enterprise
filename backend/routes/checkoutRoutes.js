@@ -4,13 +4,16 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
+const { asyncHandler } = require("../middleware/errorHandler");
+const { paymentLimiter } = require("../middleware/security");
+const { validateCheckout } = require("../middleware/validation");
 
 const router = express.Router();
 
 // @route POST /api/checkout
 // @desc Create a new checkout session
 // @access Private
-router.post("/", protect, async (req, res) => {
+router.post("/", protect, paymentLimiter, validateCheckout, asyncHandler(async (req, res) => {
   const { checkoutItems, shippingAddress, paymentMethod, totalPrice } =
     req.body;
 
@@ -32,10 +35,9 @@ router.post("/", protect, async (req, res) => {
     console.log(`Checkout created for user: ${req.user._id}`);
     res.status(201).json(newCheckout);
   } catch (error) {
-    console.error("Error Creating checkout session:", error);
-    res.status(500).json({ message: "Server Error" });
+    throw error;
   }
-});
+}));
 
 // @route PUT /api/checkout/:id/pay
 // @desc Update checkout to mark as paid after successful payment

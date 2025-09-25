@@ -2,17 +2,22 @@
 
 const express = require("express");
 const User = require("../models/User");
-//const User = require("../models/User");
 const router = express.Router();
 
 const jwt = require("jsonwebtoken");
 const { protect } = require("../middleware/authMiddleware");
+const { asyncHandler } = require("../middleware/errorHandler");
+const { authLimiter } = require("../middleware/security");
+const { 
+  validateUserRegistration, 
+  validateUserLogin 
+} = require("../middleware/validation");
 
 // @route POST /api/users/register
 // @desc Register a new user
 // @access Public
 
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, validateUserRegistration, asyncHandler(async (req, res) => {
   console.log("Request received at /register"); // Log when the route is hit
   console.log("Request body:", req.body); // Log the incoming request body
   const { name, email, password } = req.body;
@@ -49,16 +54,15 @@ router.post("/register", async (req, res) => {
       }
     );
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Server Error");
+    throw error; // Let the global error handler deal with it
   }
-});
+}));
 
 // @route POST /api/users/login
 // @desc Authenticate user
 // @access Public
 
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, validateUserLogin, asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -97,13 +101,54 @@ router.post("/login", async (req, res) => {
       }
     );
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
+    throw error; // Let the global error handler deal with it
   }
-});
+}));
 
-router.get("/profile", protect, async (req, res) => {
-  res.json(req.user);
-});
+// @route GET /api/users/profile
+// @desc Get user profile
+// @access Private
+router.get("/profile", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).select("-password");
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+  res.json({
+    success: true,
+    user,
+  });
+}));
+
+// @route PUT /api/users/profile
+// @desc Update user profile
+// @access Private
+router.put("/profile", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // Update only provided fields
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  
+  if (req.body.password) {
+    user.password = req.body.password;
+  }
+
+  const updatedUser = await user.save();
+
+  res.json({
+    success: true,
+    message: "Profile updated successfully",
+    user: {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    },
+  });
+}));
 
 module.exports = router;

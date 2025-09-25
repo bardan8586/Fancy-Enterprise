@@ -1,11 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Subscriber = require("../models/Subscriber");
+const { asyncHandler } = require("../middleware/errorHandler");
+const { contactLimiter } = require("../middleware/security");
+const { validateNewsletterSubscription } = require("../middleware/validation");
 
 // @route POST /api/subscribe
 // @desc Handle newsletter subscription
 // @access Public
-router.post("/subscribe", async (req, res) => {
+router.post("/subscribe", contactLimiter, validateNewsletterSubscription, asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -28,9 +31,8 @@ router.post("/subscribe", async (req, res) => {
       .status(201)
       .json({ message: "Successfully subscribed to the newsletter!" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    throw error;
   }
-});
+}));
 
 module.exports = router;
