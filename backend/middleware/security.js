@@ -22,17 +22,20 @@ const createRateLimit = (windowMs, max, message) => {
   });
 };
 
+// Environment-based rate limiting
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // General API rate limiting
 const generalLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  100, // limit each IP to 100 requests per windowMs
+  isDevelopment ? 1000 : 100, // Development: 1000, Production: 100 requests per windowMs
   "Too many requests from this IP, please try again later"
 );
 
 // Strict rate limiting for auth endpoints
 const authLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  5, // limit each IP to 5 requests per windowMs
+  isDevelopment ? 50 : 5, // Development: 50, Production: 5 requests per windowMs
   "Too many authentication attempts, please try again later"
 );
 

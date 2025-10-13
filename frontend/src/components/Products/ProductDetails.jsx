@@ -1,5 +1,6 @@
-import { act, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import ProductGrid from "./ProductGrid";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +10,8 @@ import {
 } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
 import { getDisplayImages, getFallbackByCategory, buildSrcSet, defaultSizes } from "../../utils/imageUtils";
+import { ProductDetailsSkeleton, LoadingButton } from "../Common/LoadingStates";
+import OptimizedImage from "../Common/OptimizedImage";
 
 const ProductDetails = ({ productId }) => {
   const { id } = useParams();
@@ -91,7 +94,7 @@ const ProductDetails = ({ productId }) => {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return <ProductDetailsSkeleton />;
   }
 
   if (error) {
@@ -107,42 +110,44 @@ const ProductDetails = ({ productId }) => {
             <div className="flex-col hidden mr-6 space-y-4 md:flex">
               {/* pass selectedProduct */}
               {displayImages.map((image, index) => (
-                <img
+                <motion.div
                   key={index}
-                  src={image.url}
-                  alt={image.altText || `Thumbnail ${index}`}
-                  // className="object-cover w-20 h-20 border"
-                  className={`object-cover w-20 h-20 border rounded-lg cursor-pointer ${
-                    mainImage === image.url ? "border-black" : "border-gray-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`border rounded-lg cursor-pointer transition-all duration-200 ${
+                    mainImage === image.url ? "border-black ring-2 ring-black/20" : "border-gray-300 hover:border-gray-400"
                   }`}
                   onClick={() => setMainImage(image.url)}
-                  onError={(e) => {
-                    e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);
-                  }}
-                  loading="lazy"
-                  decoding="async"
-                  srcSet={buildSrcSet(image.url)}
-                  sizes="80px"
-                />
+                >
+                  <OptimizedImage
+                    src={image.url}
+                    alt={image.altText || `Thumbnail ${index}`}
+                    className="object-cover w-20 h-20"
+                    fallbackCategory={selectedProduct?.category}
+                    fallbackGender={selectedProduct?.gender}
+                    aspectRatio=""
+                  />
+                </motion.div>
               ))}
             </div>
 
             {/* Main Image */}
             <div className="md:w-1/2">
-              <div className="mb-4">
-                <img
+              <motion.div 
+                className="mb-4 overflow-hidden rounded-2xl"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.3 }}
+              >
+                <OptimizedImage
                   src={mainImage}
                   alt="Main Product"
-                  className="object-cover w-full h-auto rounded-lg"
-                  onError={(e) => {
-                    e.currentTarget.src = getFallbackByCategory(selectedProduct?.category, selectedProduct?.gender);
-                  }}
-                  loading="eager"
-                  decoding="async"
-                  srcSet={buildSrcSet(mainImage)}
-                  sizes={defaultSizes}
+                  className="object-cover w-full h-auto"
+                  fallbackCategory={selectedProduct?.category}
+                  fallbackGender={selectedProduct?.gender}
+                  priority={true}
+                  aspectRatio="aspect-square"
                 />
-              </div>
+              </motion.div>
             </div>
 
             {/* Mobile Thumbnails */}
@@ -241,17 +246,14 @@ const ProductDetails = ({ productId }) => {
               </div>
 
               {/* Add to Cart Button */}
-              <button
+              <LoadingButton
                 onClick={handleAddToCart}
-                disabled={isButtonDisabled}
-                className={`w-full px-6 py-2 mb-4 text-white bg-black rounded ${
-                  isButtonDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-900"
-                }`}
+                loading={isButtonDisabled}
+                loadingText="Adding to Cart..."
+                className="w-full px-6 py-4 mb-4 text-white bg-black rounded-xl hover:bg-gray-900 transition-all duration-200 font-semibold"
               >
-                {isButtonDisabled ? "Adding..." : "Add to Cart"}
-              </button>
+                Add to Cart
+              </LoadingButton>
 
               {/* Charactersistics section */}
               <div className="mt-10 text-gray-700">

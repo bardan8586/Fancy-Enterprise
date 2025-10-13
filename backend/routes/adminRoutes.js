@@ -7,7 +7,7 @@ const router = express.Router();
 // @route GET /api/admin/users
 // @desc Get all users (Admin only)
 // @access Private/Admin
-router.get("/", protect, admin, async (req, res) => {
+router.get("/users", protect, admin, async (req, res) => {
   try {
     const users = await User.find({});
     res.json(users);
@@ -20,7 +20,7 @@ router.get("/", protect, admin, async (req, res) => {
 // @route POST /api/admin/users
 // @desc Add a new user (admin only)
 // @access Private/Admin
-router.post("/", protect, admin, async (req, res) => {
+router.post("/users", protect, admin, async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
@@ -47,7 +47,7 @@ router.post("/", protect, admin, async (req, res) => {
 // @route PUT /api/admin/users/:id
 // @desc Update user info (admin only) - Name, email and role
 // @access Private/Admin
-router.put("/:id", protect, admin, async (req, res) => {
+router.put("/users/:id", protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (user) {
@@ -66,7 +66,7 @@ router.put("/:id", protect, admin, async (req, res) => {
 // @route DELETE /api/admin/users/:id
 // @desc Delete a user
 // @access Private/Admin
-router.delete("/:id", protect, admin, async (req, res) => {
+router.delete("/users/:id", protect, admin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (user) {

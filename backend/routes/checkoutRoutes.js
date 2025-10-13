@@ -13,7 +13,7 @@ const router = express.Router();
 // @route POST /api/checkout
 // @desc Create a new checkout session
 // @access Private
-router.post("/", protect, paymentLimiter, validateCheckout, asyncHandler(async (req, res) => {
+router.post("/", protect, paymentLimiter, asyncHandler(async (req, res) => {
   const { checkoutItems, shippingAddress, paymentMethod, totalPrice } =
     req.body;
 
@@ -21,18 +21,54 @@ router.post("/", protect, paymentLimiter, validateCheckout, asyncHandler(async (
     return res.status(400).json({ message: "no items in checkout" });
   }
 
+  // Basic validation
+  if (!shippingAddress || !shippingAddress.address || !shippingAddress.city || 
+      !shippingAddress.postalCode || !shippingAddress.country) {
+    return res.status(400).json({ message: "Complete shipping address is required" });
+  }
+  
+  if (!paymentMethod || !["PayPal", "Credit Card", "Stripe"].includes(paymentMethod)) {
+    return res.status(400).json({ message: "Valid payment method is required" });
+  }
+  
+  if (!totalPrice || totalPrice <= 0) {
+    return res.status(400).json({ message: "Valid total price is required" });
+  }
+
   try {
+    // Ensure all checkout items have required fields, especially image
+    const enrichedCheckoutItems = await Promise.all(
+      checkoutItems.map(async (item) => {
+        // If image is missing, fetch it from the product
+        if (!item.image) {
+          const product = await Product.findById(item.productId);
+          if (product && product.images && product.images.length > 0) {
+            item.image = product.images[0].url;
+          } else {
+            // Fallback image if product doesn't have images
+            item.image = "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80";
+          }
+        }
+        
+        // Ensure other required fields
+        if (!item.name) item.name = "Product";
+        if (!item.price) item.price = 0;
+        if (!item.quantity) item.quantity = 1;
+        
+        return item;
+      })
+    );
+
     // Create a new checkout session
     const newCheckout = await Checkout.create({
       user: req.user._id,
-      checkoutItems: checkoutItems,
+      checkoutItems: enrichedCheckoutItems,
       shippingAddress,
       paymentMethod,
       totalPrice,
       paymentStatus: "Pending",
       isPaid: false,
     });
-    console.log(`Checkout created for user: ${req.user._id}`);
     res.status(201).json(newCheckout);
   } catch (error) {
     throw error;
@@ -82,8 +118,6 @@ router.post("/:id/finalize", protect, async (req, res) => {
 
     if (checkout.isPaid && !checkout.isFinalized) {
       // Create final order based on the checkout details
-      console.log(checkout.checkoutItems);
-
       const finalOrder = await Order.create({
         user: checkout.user,
         orderItems: checkout.checkoutItems,

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PayPalButton from "./PayPalButton";
 import { useDispatch, useSelector } from "react-redux";
 import { createCheckout } from "../../redux/slices/checkoutSlice";
+import { toast } from "sonner";
 import axios from "axios";
 
 const Checkout = () => {
@@ -10,7 +11,7 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const { cart, loading, error } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
-  console.log(user, "user");
+  const { error: checkoutError } = useSelector((state) => state.checkout);
 
   const [checkoutId, setCheckoutId] = useState(null);
   const [shippingAddress, setShippingAddress] = useState({
@@ -34,8 +35,8 @@ const Checkout = () => {
     e.preventDefault();
     const token = localStorage.getItem("userToken");
     if (!token) {
-      alert("Authentication failed. Please log in again.");
-      navigate("/login");
+      toast.error("Authentication failed. Please log in again.");
+      navigate("/login?redirect=checkout");
       return;
     }
 
@@ -51,6 +52,13 @@ const Checkout = () => {
           },
         })
       );
+      
+      if (res.type === 'checkout/createCheckout/rejected' && res.payload?.needsLogin) {
+        toast.error("Your session has expired. Please log in again.");
+        navigate("/login?redirect=checkout");
+        return;
+      }
+      
       if (res.payload && res.payload._id) {
         setCheckoutId(res.payload._id); // Set checkout ID if checkout was successful
       }

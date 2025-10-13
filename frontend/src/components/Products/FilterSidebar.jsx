@@ -223,6 +223,13 @@ const FilterSidebar = () => {
           min={0}
           max={100}
           value={priceRange[1]}
+          onChange={(e) => {
+            const newMax = parseInt(e.target.value);
+            setPriceRange([priceRange[0], newMax]);
+            const newFilters = { ...filters, maxPrice: newMax };
+            setFilters(newFilters);
+            updateURLParams(newFilters);
+          }}
           className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer "
         />
         <div className="flex justify-between mt-2 text-gray-600">

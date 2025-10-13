@@ -8,8 +8,6 @@ const router = express.Router();
 // @desc Create a new Product
 // @access Private/Admin
 router.post("/", protect, admin, async (req, res) => {
-  // console.log(req.user);
-  // return;
   try {
     const {
       name,
@@ -69,7 +67,6 @@ router.post("/", protect, admin, async (req, res) => {
 // @desc Update an existing product ID
 // @access Private/Admin
 router.put("/:id", protect, admin, async (req, res) => {
-  console.log(req.params.id, "id");
   try {
     const {
       name,
@@ -286,10 +283,12 @@ router.get("/:id", async (req, res) => {
     if (product) {
       res.json(product);
     } else {
-      console.error(error);
-      res.status(500).send("Server Error");
+      res.status(404).json({ message: "Product not found" });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
 });
 
 // // @route GET /api/products/similar/:id

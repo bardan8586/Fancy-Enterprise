@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear E-Commerce Storage</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+        .storage-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .storage-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .storage-item:last-child {
+            border-bottom: none;
+        }
+        .key {
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .value {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        .success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #ffd700;
+        }
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🧹</div>
+        <h1>E-Commerce Storage Cleaner</h1>
+        
+        <div class="info">
+            <strong>🎯 Purpose:</strong> Clear corrupted authentication and cart data that's causing JWT malformed errors and checkout issues.
+        </div>
+        
+        <div class="storage-info">
+            <h3>📊 Current localStorage Data:</h3>
+            <div id="storageContents">Loading...</div>
+        </div>
+        
+        <button onclick="clearSpecificKeys()">🔑 Clear Auth & Cart Data</button>
+        <button onclick="clearAllStorage()">🗑️ Clear All localStorage</button>
+        <button onclick="refreshStorageInfo()">🔄 Refresh View</button>
+        
+        <div id="result"></div>
+        
+        <div class="info">
+            <strong>💡 After clearing:</strong><br>
+            1. Go back to your frontend (localhost:5173)<br>
+            2. Hard refresh (Ctrl+Shift+R or Cmd+Shift+R)<br>
+            3. Register/Login with fresh credentials<br>
+            4. Test the complete flow!
+        </div>
+    </div>
+
+    <script>
+        function displayStorageContents() {
+            const container = document.getElementById('storageContents');
+            const storage = {...localStorage};
+            
+            if (Object.keys(storage).length === 0) {
+                container.innerHTML = '<div class="storage-item">✅ No data found - localStorage is clean!</div>';
+                return;
+            }
+            
+            let html = '';
+            for (const [key, value] of Object.entries(storage)) {
+                const truncatedValue = value.length > 100 ? value.substring(0, 100) + '...' : value;
+                const isProblematic = ['userToken', 'userInfo', 'cart', 'guestId'].includes(key);
+                const emoji = isProblematic ? '⚠️' : '📝';
+                
+                html += `
+                    <div class="storage-item">
+                        <div class="key">${emoji} ${key}:</div>
+                        <div class="value">${truncatedValue}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+        
+        function clearSpecificKeys() {
+            const keysToRemove = ['userToken', 'userInfo', 'cart', 'guestId'];
+            let removedCount = 0;
+            
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    localStorage.removeItem(key);
+                    removedCount++;
+                }
+            });
+            
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <div class="info success" style="background: linear-gradient(45deg, #00b894, #00cec9);">
+                    ✅ Successfully removed ${removedCount} problematic items!<br>
+                    <small>Cleared: ${keysToRemove.join(', ')}</small>
+                </div>
+            `;
+            
+            displayStorageContents();
+        }
+        
+        function clearAllStorage() {
+            const itemCount = localStorage.length;
+            localStorage.clear();
+            
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <div class="info success" style="background: linear-gradient(45deg, #00b894, #00cec9);">
+                    🗑️ Cleared all localStorage data!<br>
+                    <small>Removed ${itemCount} items total</small>
+                </div>
+            `;
+            
+            displayStorageContents();
+        }
+        
+        function refreshStorageInfo() {
+            displayStorageContents();
+            
+            const result = document.getElementById('result');
+            result.innerHTML = `
+                <div class="info" style="background: linear-gradient(45deg, #74b9ff, #0984e3);">
+                    🔄 Storage data refreshed!
+                </div>
+            `;
+        }
+        
+        // Initialize on page load
+        window.onload = function() {
+            displayStorageContents();
+            
+            // Auto-refresh every 5 seconds to show real-time changes
+            setInterval(displayStorageContents, 5000);
+        };
+    </script>
+</body>
+</html>
+
+

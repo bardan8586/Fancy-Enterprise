@@ -21,6 +21,7 @@ const userRoutes = require("./routes/userRoutes");
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const checkoutRoutes = require("./routes/checkoutRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const adminOrderRoutes = require("./routes/adminOrderRoutes");
 const productAdminRoutes = require("./routes/productAdminRoutes");
@@ -91,6 +92,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/checkout", checkoutRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/orders", adminOrderRoutes);
 app.use("/api/admin/products", productAdminRoutes);
@@ -102,6 +104,16 @@ app.use(notFound);
 
 // Global error handler (must be last)
 app.use(errorHandler);
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`
+🚀 Server running in ${process.env.NODE_ENV || "development"} mode
+📍 URL: http://localhost:${PORT}
+🏥 Health check: http://localhost:${PORT}/health
+⏰ Started at: ${new Date().toISOString()}
+  `);
+});
 
 // Graceful shutdown handling
 process.on("SIGTERM", () => {
@@ -116,13 +128,4 @@ process.on("SIGINT", () => {
   server.close(() => {
     console.log("Process terminated");
   });
-});
-
-const server = app.listen(PORT, () => {
-  console.log(`
-🚀 Server running in ${process.env.NODE_ENV || "development"} mode
-📍 URL: http://localhost:${PORT}
-🏥 Health check: http://localhost:${PORT}/health
-⏰ Started at: ${new Date().toISOString()}
-  `);
 });

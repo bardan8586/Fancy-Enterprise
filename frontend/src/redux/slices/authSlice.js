@@ -1,10 +1,56 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Retrieve user info and token from localStorage if available
-const userFromStorage = localStorage.getItem("userInfo")
-  ? JSON.parse(localStorage.getItem("userInfo"))
-  : null;
+// Check if stored token is expired and clear if needed
+const checkTokenExpiration = () => {
+  const token = localStorage.getItem("userToken");
+  const userInfo = localStorage.getItem("userInfo");
+  
+  if (token && userInfo) {
+    try {
+      // Validate JWT format first (should have 3 parts separated by dots)
+      if (!token || typeof token !== 'string' || token.split('.').length !== 3) {
+        throw new Error('Invalid JWT format');
+      }
+      
+      // Decode JWT payload (basic check - just check exp without verification)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      
+      // Check if payload has required fields
+      if (!payload.exp || !payload.user) {
+        throw new Error('Invalid JWT payload');
+      }
+      
+      if (payload.exp < currentTime) {
+        // Token is expired, clear it
+        localStorage.removeItem("userToken");
+        localStorage.removeItem("userInfo");
+        return null;
+      }
+      
+      // Validate userInfo format
+      const parsedUserInfo = JSON.parse(userInfo);
+      if (!parsedUserInfo._id || !parsedUserInfo.email) {
+        throw new Error('Invalid user info format');
+      }
+      
+      return parsedUserInfo;
+    } catch (error) {
+      // Invalid token format or corrupted data, clear everything
+      console.warn('Clearing corrupted authentication data:', error.message);
+      localStorage.removeItem("userToken");
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("cart"); // Also clear potentially corrupted cart
+      localStorage.removeItem("guestId");
+      return null;
+    }
+  }
+  return null;
+};
+
+// Retrieve user info and token from localStorage if available and not expired
+const userFromStorage = checkTokenExpiration();
 
 // Check for an existing guest ID in the localStorage or generate a new One
 const initialGuestId =
@@ -73,6 +119,13 @@ const authSlice = createSlice({
       state.guestId = `guest_${new Date().getTime()}`;
       localStorage.setItem("guestId", state.guestId);
     },
+    clearExpiredAuth: (state) => {
+      // Handle token expiration gracefully
+      state.user = null;
+      state.error = "Your session has expired. Please log in again.";
+      localStorage.removeItem("userInfo");
+      localStorage.removeItem("userToken");
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -103,5 +156,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, generateNewGuestId } = authSlice.actions;
+export const { logout, generateNewGuestId, clearExpiredAuth } = authSlice.actions;
 export default authSlice.reducer;

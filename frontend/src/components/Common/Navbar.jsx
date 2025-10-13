@@ -6,6 +6,7 @@ import {
 } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "./SearchBar";
 import CartDrawer from "../Layout/CartDrawer";
 import { useSelector } from "react-redux";
@@ -33,68 +34,89 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="container flex items-center justify-between px-6 py-4 mx-auto">
+      <motion.nav 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="container flex items-center justify-between px-6 py-4 mx-auto backdrop-blur-sm bg-white/90 sticky top-0 z-40"
+      >
         {/* left logo */}
-        <div>
-          <Link to="/" className="text-2xl font-medium">
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
             FANCY
           </Link>
-        </div>
+        </motion.div>
 
         {/* center navigation link */}
-        <div className="hidden space-x-4 md:flex">
-          <Link
-            to="/collections/all?gender=Men"
-            className="text-sm font-medium text-gray-700 uppercase hover:text-black "
-          >
-            Men
-          </Link>
-
-          <Link
-            to="/collections/all?gender=Women"
-            className="text-sm font-medium text-gray-700 uppercase hover:text-black "
-          >
-            Women
-          </Link>
-
-          <Link
-            to="/collections/all?category=Top Wear"
-            className="text-sm font-medium text-gray-700 uppercase hover:text-black "
-          >
-            Top Wear
-          </Link>
-
-          <Link
-            to="/collections/all?category=Bottom Wear"
-            className="text-sm font-medium text-gray-700 uppercase hover:text-black "
-          >
-            Bottom Wear
-          </Link>
+        <div className="hidden space-x-8 md:flex">
+          {[
+            { to: "/collections/all?gender=Men", label: "Men" },
+            { to: "/collections/all?gender=Women", label: "Women" },
+            { to: "/collections/all?category=Top Wear", label: "Top Wear" },
+            { to: "/collections/all?category=Bottom Wear", label: "Bottom Wear" }
+          ].map((item, index) => (
+            <motion.div
+              key={item.label}
+              whileHover={{ y: -2 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Link
+                to={item.to}
+                className="relative text-sm font-medium text-gray-700 uppercase hover:text-black transition-colors duration-200 group"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            </motion.div>
+          ))}
         </div>
 
         {/* right icon */}
         <div className="flex items-center space-x-4">
           {user && user.role === "admin" && (
-            <Link to="/admin" className="px-2 text-white bg-black rounded">
-              Admin
-            </Link>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link to="/admin" className="px-4 py-2 text-white bg-black rounded-lg hover:bg-gray-800 transition-colors duration-200">
+                Admin
+              </Link>
+            </motion.div>
           )}
 
-          <Link to="/profile" className="hover:text-black">
-            <HiOutlineUser className="w-6 h-6 text-gray-700" />
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/profile" className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
+              <HiOutlineUser className="w-6 h-6 text-gray-700" />
+            </Link>
+          </motion.div>
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             onClick={toggleCartDrawer}
-            className="relative hover:text-black"
+            className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
           >
             <HiOutlineShoppingBag className="w-6 h-6 text-gray-700" />
-            {cartItemCount > 0 && (
-              <span className="absolute top-0 right-0 inline-flex justify-center px-2 py-1 text-xs font-bold text-red-100 transform translate-x-1/2 -translate-y-1/2 rounded-full bg-ecomm-purple">
-                {cartItemCount}
-              </span>
-            )}
-          </button>
+            <AnimatePresence>
+              {cartItemCount > 0 && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white transform rounded-full bg-ecomm-purple min-w-[20px] h-5"
+                >
+                  {cartItemCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
 
           {/* Search Icon */}
           <div className="overflow-hidden">
@@ -102,63 +124,122 @@ const Navbar = () => {
           </div>
 
           {/* Hamburger menu icon which won't be visible on large screen */}
-          <button onClick={toggleNavDrawer} className="md:hidden">
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleNavDrawer} 
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 md:hidden"
+          >
             <HiBars3BottomRight className="w-6 h-6 text-gray-700" />
-          </button>
+          </motion.button>
         </div>
-      </nav>
+      </motion.nav>
 
       <CartDrawer drawerOpen={drawerOpen} toggleCartDrawer={toggleCartDrawer} />
 
       {/* add a CartDrawer Component */}
 
-      {/* mobile navigation */}
-      <div
-        className={`fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-lg transform transition-transform duration-300 z-50 ${
-          navDrawerOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Close button */}
-        <div className="flex justify-end p-4">
-          <button onClick={toggleNavDrawer}>
-            <IoMdClose />
-          </button>
-        </div>
-        {/* Navigation Links */}
-        <div className="p-4">
-          <h2 className="mb-4 text-xl font-semibold">Menu</h2>
-          <nav className="space-y-4">
-            <Link
-              to="/collections/all?gender=Men"
+      {/* Mobile navigation with backdrop */}
+      <AnimatePresence>
+        {navDrawerOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/50 z-40"
               onClick={toggleNavDrawer}
-              className="block text-gray-600 hover:text-black"
+            />
+            
+            {/* Mobile Menu */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 w-3/4 sm:w-1/2 md:w-1/3 h-full bg-white shadow-2xl z-50 flex flex-col"
             >
-              Men
-            </Link>
-            <Link
-              to="/collections/all?gender=Women"
-              onClick={toggleNavDrawer}
-              className="block text-gray-600 hover:text-black"
-            >
-              Women
-            </Link>
-            <Link
-              to="/collections/all?category=Top Wear"
-              onClick={toggleNavDrawer}
-              className="block text-gray-600 hover:text-black"
-            >
-              Top Wear
-            </Link>
-            <Link
-              to="/collections/all?category=Bottom Wear"
-              onClick={toggleNavDrawer}
-              className="block text-gray-600 hover:text-black"
-            >
-              Bottom Wear
-            </Link>
-          </nav>
-        </div>
-      </div>
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900">Menu</h2>
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={toggleNavDrawer}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <IoMdClose className="w-6 h-6 text-gray-600" />
+                </motion.button>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="flex-1 p-6">
+                <nav className="space-y-2">
+                  {[
+                    { to: "/collections/all?gender=Men", label: "Men's Collection", icon: "👔" },
+                    { to: "/collections/all?gender=Women", label: "Women's Collection", icon: "👗" },
+                    { to: "/collections/all?category=Top Wear", label: "Top Wear", icon: "👕" },
+                    { to: "/collections/all?category=Bottom Wear", label: "Bottom Wear", icon: "👖" }
+                  ].map((item, index) => (
+                    <motion.div
+                      key={item.label}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Link
+                        to={item.to}
+                        onClick={toggleNavDrawer}
+                        className="flex items-center p-4 rounded-xl text-gray-700 hover:bg-gray-50 hover:text-black transition-all duration-200 group"
+                      >
+                        <span className="text-2xl mr-4 group-hover:scale-110 transition-transform duration-200">
+                          {item.icon}
+                        </span>
+                        <span className="font-medium">{item.label}</span>
+                        <motion.span 
+                          className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          whileHover={{ x: 5 }}
+                        >
+                          →
+                        </motion.span>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </nav>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t border-gray-100">
+                {user ? (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">Welcome back!</p>
+                    <p className="font-medium text-gray-900">{user.name}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Link
+                      to="/login"
+                      onClick={toggleNavDrawer}
+                      className="block w-full py-3 text-center bg-black text-white rounded-xl hover:bg-gray-800 transition-colors duration-200"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      onClick={toggleNavDrawer}
+                      className="block w-full py-3 text-center border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      Create Account
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 };

@@ -2,16 +2,18 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API_URL = `${import.meta.env.VITE_BACKEND_URL}`;
-const USER_TOKEN = `Bearer ${localStorage.getItem("userToken")}`;
+
+// Helper function to get fresh token
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+});
 
 // async thunk to fetch admin products
 export const fetchAdminProducts = createAsyncThunk(
   "adminProducts/fetchProducts",
   async () => {
     const response = await axios.get(`${API_URL}/api/admin/products`, {
-      headers: {
-        Authorization: USER_TOKEN,
-      },
+      headers: getAuthHeaders(),
     });
     return response.data;
   }
@@ -20,17 +22,21 @@ export const fetchAdminProducts = createAsyncThunk(
 // async function to create a new product
 export const createProduct = createAsyncThunk(
   "adminProducts/createProduct",
-  async (productData) => {
-    const response = await axios.post(
-      `${API_URL}/api/admin/products`,
-      productData,
-      {
-        headers: {
-          Authorization: USER_TOKEN,
-        },
-      }
-    );
-    return response.data;
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/admin/products`,
+        productData,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Failed to create product"
+      );
+    }
   }
 );
 
@@ -42,9 +48,7 @@ export const updateProduct = createAsyncThunk(
       `${API_URL}/api/admin/products/${id}`,
       productData,
       {
-        headers: {
-          Authorization: USER_TOKEN,
-        },
+        headers: getAuthHeaders(),
       }
     );
     return response.data;
@@ -55,8 +59,8 @@ export const updateProduct = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
   "adminProducts/deleteProduct",
   async (id) => {
-    await axios.delete(`${API_URL}/api/products/${id}`, {
-      headers: { Authorization: USER_TOKEN },
+    await axios.delete(`${API_URL}/api/admin/products/${id}`, {
+      headers: getAuthHeaders(),
     });
     return id;
   }
@@ -74,6 +78,7 @@ const adminProductSlice = createSlice({
     builder
       .addCase(fetchAdminProducts.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchAdminProducts.fulfilled, (state, action) => {
         state.loading = false;
@@ -84,8 +89,17 @@ const adminProductSlice = createSlice({
         state.error = action.error.message;
       })
       //   Create Product
+      .addCase(createProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createProduct.fulfilled, (state, action) => {
-        state.products.push(action.payload);
+        state.loading = false;
+        state.products.unshift(action.payload); // Add to beginning
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || action.error.message;
       })
       //   Update Product
       .addCase(updateProduct.fulfilled, (state, action) => {
