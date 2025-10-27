@@ -9,11 +9,14 @@ const router = express.Router();
 // @access Private/Admin
 router.get("/", protect, admin, async (req, res) => {
   try {
-    const orders = await Order.find({}).populate("user", "name email");
+    const orders = await Order.find({})
+      .populate("user", "name email")
+      .populate("orderItems.productId", "name price images")
+      .sort({ createdAt: -1 }); // Most recent first
     res.json(orders);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 });
 

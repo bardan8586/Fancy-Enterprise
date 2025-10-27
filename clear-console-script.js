@@ -51,3 +51,6 @@ if (localStorage.length === 0) {
 console.log("\n🚀 Ready to test your e-commerce platform!");
 
 
+
+
+

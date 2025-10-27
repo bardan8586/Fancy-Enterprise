@@ -11,7 +11,7 @@ const Cart = require("./models/Cart");
 dotenv.config();
 
 // Connect to mongoDB
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGODB_URI);
 
 // Function to seed data
 

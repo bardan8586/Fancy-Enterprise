@@ -22,6 +22,11 @@ router.get("/", protect, admin, async (req, res) => {
 // @access Private/Admin
 router.post("/", protect, admin, async (req, res) => {
   try {
+    // Check if user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const {
       name,
       description,
@@ -55,7 +60,7 @@ router.post("/", protect, admin, async (req, res) => {
     }
 
     // Create product
-    const product = new Product({
+    const productData = {
       name,
       description,
       price: parseFloat(price),
@@ -68,18 +73,36 @@ router.post("/", protect, admin, async (req, res) => {
       colors: Array.isArray(colors) && colors.length > 0 ? colors : ["Default"],
       collections: collections || "General",
       material: material || "",
-      gender: gender || "",
       isFeatured: isFeatured || false,
       isPublished: isPublished !== undefined ? isPublished : true,
       images: images || [],
-      user: req.user._id // Set the user who created the product
-    });
+      user: req.user._id
+    };
+
+    // Only add gender if it has a value
+    if (gender && gender.trim()) {
+      productData.gender = gender;
+    }
+
+    const product = new Product(productData);
 
     const createdProduct = await product.save();
     res.status(201).json(createdProduct);
   } catch (error) {
     console.error("Error creating product:", error);
-    res.status(500).json({ message: "Server Error", error: error.message });
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    res.status(500).json({ 
+      message: "Server Error", 
+      error: error.message,
+      details: error.errors ? Object.keys(error.errors).map(key => ({
+        field: key,
+        message: error.errors[key].message
+      })) : null
+    });
   }
 });
 

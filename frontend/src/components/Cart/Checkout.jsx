@@ -45,7 +45,7 @@ const Checkout = () => {
         createCheckout({
           checkoutItems: cart.products,
           shippingAddress,
-          paymentMethod: "Paypal",
+          paymentMethod: "PayPal",
           totalPrice: cart.totalPrice,
           headers: {
             Authorization: `Bearer ${token}`,

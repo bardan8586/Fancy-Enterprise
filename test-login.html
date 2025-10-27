@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Login</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Test Admin Login</h1>
+    <p>Use this form to test admin login and see the authentication token.</p>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="admin@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="123456" required>
+        </div>
+        <button type="submit">Login as Admin</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <h2>Current Auth Status</h2>
+    <div id="authStatus"></div>
+    
+    <h2>Test Admin Endpoint</h2>
+    <button onclick="testAdminEndpoint()">Test /api/admin/users</button>
+    <div id="endpointResult"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        
+        // Check current auth status
+        function checkAuthStatus() {
+            const token = localStorage.getItem('userToken');
+            const userInfo = localStorage.getItem('userInfo');
+            
+            const statusDiv = document.getElementById('authStatus');
+            
+            if (token && userInfo) {
+                try {
+                    const user = JSON.parse(userInfo);
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ Logged In</strong><br>
+                            User: ${user.name} (${user.email})<br>
+                            Role: ${user.role}<br>
+                            Token: ${token.substring(0, 50)}...
+                        </div>
+                    `;
+                } catch (e) {
+                    statusDiv.innerHTML = `<div class="error">❌ Invalid user info in localStorage</div>`;
+                }
+            } else {
+                statusDiv.innerHTML = `<div class="info">ℹ️ Not logged in</div>`;
+            }
+        }
+        
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = '<div class="info">🔄 Logging in...</div>';
+                
+                const response = await fetch(`${API_URL}/api/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token and user info
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userInfo', JSON.stringify(data.user));
+                    
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ Login Successful!</strong><br>
+                            User: ${data.user.name}<br>
+                            Email: ${data.user.email}<br>
+                            Role: ${data.user.role}<br>
+                            Token stored in localStorage
+                        </div>
+                    `;
+                    
+                    checkAuthStatus();
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login Failed: ${data.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        });
+        
+        // Test admin endpoint
+        async function testAdminEndpoint() {
+            const token = localStorage.getItem('userToken');
+            const resultDiv = document.getElementById('endpointResult');
+            
+            if (!token) {
+                resultDiv.innerHTML = '<div class="error">❌ No token found. Please login first.</div>';
+                return;
+            }
+            
+            try {
+                resultDiv.innerHTML = '<div class="info">🔄 Testing admin endpoint...</div>';
+                
+                const response = await fetch(`${API_URL}/api/admin/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ Admin Endpoint Working!</strong><br>
+                            Found ${data.length} users<br>
+                            Users: ${data.map(u => u.name).join(', ')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Admin Endpoint Failed: ${data.message || 'Unknown error'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Network Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Check auth status on page load
+        checkAuthStatus();
+    </script>
+</body>
+</html>
+
+

@@ -5,6 +5,7 @@ import { fetchProductDetails, updateProduct } from "../../redux/slices/productsS
 import { createProduct } from "../../redux/slices/adminProductSlice";
 import { toast } from "sonner";
 import { FaArrowLeft, FaSave, FaSpinner, FaPlus, FaUpload, FaTimes } from "react-icons/fa";
+import ImageUpload from "../Common/ImageUpload";
 
 const EditProductPage = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const EditProductPage = () => {
     isPublished: true,
   });
   
+  const [images, setImages] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch product data only in EDIT mode
@@ -70,6 +72,16 @@ const EditProductPage = () => {
           ? selectedProduct.isPublished 
           : true,
       });
+      // Populate images
+      if (Array.isArray(selectedProduct.images)) {
+        setImages(selectedProduct.images.map((img, idx) => ({
+          id: img._id || `existing-${idx}`,
+          url: img.url,
+          thumbnail: img.url,
+          original: img.url,
+          metadata: { width: 800, height: 800, format: 'jpeg' }
+        })));
+      }
     }
   }, [selectedProduct, id, isCreateMode]);
 
@@ -120,6 +132,7 @@ const EditProductPage = () => {
         gender: formData.gender,
         isFeatured: formData.isFeatured,
         isPublished: formData.isPublished,
+        images: images.map(img => ({ url: img.url })),
       };
 
       let result;
@@ -503,16 +516,16 @@ const EditProductPage = () => {
           </div>
         </div>
 
-        {/* Image Upload Placeholder */}
+        {/* Image Upload */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">
             📸 Product Images
           </h3>
-          <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 text-center">
-            <FaUpload className="mx-auto text-4xl text-gray-400 mb-3" />
-            <p className="text-gray-600 mb-1">Image upload feature</p>
-            <p className="text-sm text-gray-500">Coming soon - You can add images after product creation</p>
-          </div>
+          <ImageUpload
+            onImagesChange={setImages}
+            existingImages={images}
+            maxFiles={5}
+          />
         </div>
 
         {/* Submit Buttons */}

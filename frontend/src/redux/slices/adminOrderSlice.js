@@ -1,6 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Helper function to get fresh token
+const getAuthHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("userToken")}`,
+});
+
 // Fetch all orders (admin only)
 export const fetchAllOrders = createAsyncThunk(
   "adminOrders/fetchAllOrders",
@@ -9,14 +14,12 @@ export const fetchAllOrders = createAsyncThunk(
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -30,14 +33,12 @@ export const updateOrderStatus = createAsyncThunk(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${id}`,
         { status },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -50,14 +51,12 @@ export const deleteOrder = createAsyncThunk(
       await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}/api/admin/orders/${id}`,
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
-          },
+          headers: getAuthHeaders(),
         }
       );
       return id;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );

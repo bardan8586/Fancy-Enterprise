@@ -28,7 +28,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // General API rate limiting
 const generalLimiter = createRateLimit(
   15 * 60 * 1000, // 15 minutes
-  isDevelopment ? 1000 : 100, // Development: 1000, Production: 100 requests per windowMs
+  isDevelopment ? 10000 : 100, // Development: 10000, Production: 100 requests per windowMs
   "Too many requests from this IP, please try again later"
 );
 

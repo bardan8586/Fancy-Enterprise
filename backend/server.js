@@ -1,3 +1,4 @@
+//9XKE7XNA73Y4NKHMGRPV1QNH
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -46,6 +47,27 @@ if (process.env.NODE_ENV === "development") {
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Serve static files from uploads directory with CORS headers
+app.use('/uploads', (req, res, next) => {
+  // Set CORS headers for static files
+  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  // Allow cross-origin resource usage for images
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  // For completeness, allow embedding if needed
+  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+    return;
+  }
+  
+  next();
+}, express.static('uploads'));
 
 // CORS configuration
 const corsOptions = {

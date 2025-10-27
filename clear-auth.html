@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Authentication Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        button { background: #dc3545; color: white; padding: 15px 30px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 10px; }
+        button:hover { background: #c82333; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 15px; border-radius: 4px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧹 Clear Authentication Data</h1>
+    <p>This will clear all authentication data from localStorage and redirect you to the login page.</p>
+    
+    <button onclick="clearAuthData()">Clear All Auth Data</button>
+    <button onclick="goToLogin()">Go to Login Page</button>
+    
+    <div id="result"></div>
+    
+    <h2>Current localStorage Contents:</h2>
+    <div id="storageInfo"></div>
+
+    <script>
+        function showStorageInfo() {
+            const storageDiv = document.getElementById('storageInfo');
+            const items = [];
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                const value = localStorage.getItem(key);
+                items.push(`<strong>${key}:</strong> ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}`);
+            }
+            
+            if (items.length === 0) {
+                storageDiv.innerHTML = '<div class="info">No items in localStorage</div>';
+            } else {
+                storageDiv.innerHTML = '<div class="info">' + items.join('<br>') + '</div>';
+            }
+        }
+        
+        function clearAuthData() {
+            // Clear all authentication-related data
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userInfo');
+            localStorage.removeItem('cart');
+            localStorage.removeItem('guestId');
+            
+            // Clear any other potentially corrupted data
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.includes('auth') || key.includes('user') || key.includes('token')) {
+                    keysToRemove.push(key);
+                }
+            }
+            
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            
+            document.getElementById('result').innerHTML = '<div class="success">✅ All authentication data cleared!</div>';
+            showStorageInfo();
+        }
+        
+        function goToLogin() {
+            window.location.href = 'http://localhost:5173/login';
+        }
+        
+        // Show current storage on page load
+        showStorageInfo();
+    </script>
+</body>
+</html>
+
+
