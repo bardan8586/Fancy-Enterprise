@@ -39,7 +39,7 @@ const Navbar = () => {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="container flex items-center justify-between px-6 py-4 mx-auto backdrop-blur-sm bg-white/90 sticky top-0 z-40"
+        className="container flex items-center justify-between px-6 py-4 mx-auto mt-4 bg-white/80 border border-white/40 rounded-2xl shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl sticky top-4 z-40"
       >
         {/* left logo */}
         <motion.div
@@ -53,7 +53,7 @@ const Navbar = () => {
               className="w-12 h-12 rounded-full object-cover shadow-sm border border-white/60"
               loading="lazy"
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent tracking-wide">
               FANCY
             </span>
           </Link>
@@ -74,10 +74,10 @@ const Navbar = () => {
             >
               <Link
                 to={item.to}
-                className="relative text-sm font-medium text-gray-700 uppercase hover:text-black transition-colors duration-200 group"
+                className="relative text-sm font-semibold text-slate-600 uppercase tracking-wide hover:text-slate-900 transition-colors duration-200 group"
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-rose-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </motion.div>
           ))}
@@ -100,8 +100,8 @@ const Navbar = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link to="/profile" className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200">
-              <HiOutlineUser className="w-6 h-6 text-gray-700" />
+            <Link to="/profile" className="p-2 rounded-full hover:bg-slate-100 transition-colors duration-200">
+              <HiOutlineUser className="w-6 h-6 text-slate-700" />
             </Link>
           </motion.div>
 
@@ -109,9 +109,9 @@ const Navbar = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleCartDrawer}
-            className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+            className="relative p-2 rounded-full hover:bg-slate-100 transition-colors duration-200"
           >
-            <HiOutlineShoppingBag className="w-6 h-6 text-gray-700" />
+            <HiOutlineShoppingBag className="w-6 h-6 text-slate-700" />
             <AnimatePresence>
               {cartItemCount > 0 && (
                 <motion.span
@@ -137,9 +137,9 @@ const Navbar = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleNavDrawer} 
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200 md:hidden"
+            className="p-2 rounded-full hover:bg-slate-100 transition-colors duration-200 md:hidden"
           >
-            <HiBars3BottomRight className="w-6 h-6 text-gray-700" />
+            <HiBars3BottomRight className="w-6 h-6 text-slate-700" />
           </motion.button>
         </div>
       </motion.nav>
