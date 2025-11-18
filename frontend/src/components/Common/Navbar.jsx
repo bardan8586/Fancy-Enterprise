@@ -8,6 +8,7 @@ import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "./SearchBar";
+import FancyLogo from "../../assets/800w-V5Jc3vwV1Wk.webp";
 import CartDrawer from "../Layout/CartDrawer";
 import { useSelector } from "react-redux";
 
@@ -42,11 +43,19 @@ const Navbar = () => {
       >
         {/* left logo */}
         <motion.div
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.02 }}
           transition={{ duration: 0.2 }}
         >
-          <Link to="/" className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-            FANCY
+          <Link to="/" className="flex items-center space-x-3">
+            <img
+              src={FancyLogo}
+              alt="Fancy logo"
+              className="w-12 h-12 rounded-full object-cover shadow-sm border border-white/60"
+              loading="lazy"
+            />
+            <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              FANCY
+            </span>
           </Link>
         </motion.div>
 
@@ -163,7 +172,17 @@ const Navbar = () => {
             >
               {/* Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900">Menu</h2>
+                <div className="flex items-center space-x-3">
+                  <img
+                    src={FancyLogo}
+                    alt="Fancy logo"
+                    className="w-10 h-10 rounded-full object-cover border border-white/70 shadow"
+                  />
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Fancy</p>
+                    <h2 className="text-lg font-semibold text-gray-900">Curated Menu</h2>
+                  </div>
+                </div>
                 <motion.button 
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.95 }}

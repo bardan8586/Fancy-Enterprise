@@ -14,11 +14,13 @@ const mg = mailgun({
  */
 const sendPasswordResetEmail = async (email, resetToken, userName = 'User') => {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+  const brandName = process.env.EMAIL_FROM_NAME || 'Fancy';
+  const accentColor = '#7C3AED';
   
   const data = {
-    from: `${process.env.EMAIL_FROM_NAME || 'Your App'} <${process.env.MAILGUN_FROM_EMAIL}>`,
+    from: `${brandName} <${process.env.MAILGUN_FROM_EMAIL}>`,
     to: email,
-    subject: 'Password Reset Request',
+    subject: `Reset your ${brandName} password`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -27,80 +29,63 @@ const sendPasswordResetEmail = async (email, resetToken, userName = 'User') => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Password Reset</title>
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #fff; padding: 30px; border: 1px solid #e9ecef; }
-            .button { 
-              display: inline-block; 
-              background: #007bff; 
-              color: white; 
-              padding: 12px 24px; 
-              text-decoration: none; 
-              border-radius: 5px; 
-              margin: 20px 0;
-            }
-            .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; color: #6c757d; }
-            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+            body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #0f172a; margin: 0; padding: 0; background:#f4f3ff; }
+            .container { max-width: 640px; margin:0 auto; padding:32px 16px; }
+            .card { background:#fff; border-radius:24px; overflow:hidden; box-shadow:0 25px 60px rgba(15,23,42,.12); }
+            .hero { background:linear-gradient(135deg,#F472B6,${accentColor}); padding:32px 40px; color:#fff; }
+            .content { padding:40px; }
+            .button { display:inline-block; background:${accentColor}; color:#fff; padding:12px 24px; border-radius:999px; font-weight:600; text-decoration:none; margin:24px 0; box-shadow:0 12px 30px rgba(124,58,237,.35); }
+            .code-block { background:#0f172a; color:#e2e8f0; padding:16px; border-radius:14px; word-break:break-all; font-family:'JetBrains Mono',monospace; font-size:13px; }
+            .warning { background:#fef3c7; border-radius:14px; padding:16px; border:1px solid #fde68a; margin:24px 0; }
+            .footer { padding:24px; text-align:center; font-size:13px; color:#94a3b8; }
           </style>
         </head>
         <body>
           <div class="container">
-            <div class="header">
-              <h1>🔐 Password Reset Request</h1>
-            </div>
-            
-            <div class="content">
-              <p>Hello ${userName},</p>
-              
-              <p>We received a request to reset your password. If you made this request, click the button below to reset your password:</p>
-              
-              <div style="text-align: center;">
-                <a href="${resetUrl}" class="button">Reset My Password</a>
+            <div class="card">
+              <div class="hero">
+                <p style="letter-spacing:.1em;text-transform:uppercase;font-size:12px;margin:0 0 6px;">Action required</p>
+                <h1 style="margin:0;">Reset your password</h1>
+                <p style="margin:10px 0 0;">We received a request to refresh your ${brandName} credentials.</p>
               </div>
-              
-              <p>Or copy and paste this link into your browser:</p>
-              <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                ${resetUrl}
-              </p>
-              
-              <div class="warning">
-                <strong>⚠️ Important:</strong>
-                <ul>
-                  <li>This link will expire in <strong>15 minutes</strong></li>
-                  <li>If you didn't request this reset, please ignore this email</li>
-                  <li>Your password will remain unchanged until you click the link above</li>
-                </ul>
+              <div class="content">
+                <p>Hi ${userName},</p>
+                <p>Tap the button below to create a new password and step back into your wardrobe.</p>
+                <div style="text-align:center;">
+                  <a href="${resetUrl}" class="button">Create a new password</a>
+                </div>
+                <p style="margin-top:24px;">Prefer to copy the link?</p>
+                <div class="code-block">${resetUrl}</div>
+                <div class="warning">
+                  <strong>Security notes:</strong>
+                  <ul>
+                    <li>The link expires in 15 minutes.</li>
+                    <li>If this wasn’t you, ignore the email—your password stays the same.</li>
+                    <li>Need help? Reply and our concierge will assist.</li>
+                  </ul>
+                </div>
+                <p>With love,<br><strong>The ${brandName} team</strong></p>
               </div>
-              
-              <p>If you're having trouble with the button above, copy and paste the URL into your web browser.</p>
-              
-              <p>Best regards,<br>Your App Team</p>
             </div>
-            
             <div class="footer">
-              <p>This email was sent because a password reset was requested for your account.</p>
-              <p>If you didn't request this, please contact support.</p>
+              <p>© ${new Date().getFullYear()} ${brandName}. Dressing every chapter.</p>
             </div>
           </div>
         </body>
       </html>
     `,
     text: `
-      Password Reset Request
-      
-      Hello ${userName},
-      
-      We received a request to reset your password. If you made this request, visit the link below to reset your password:
-      
-      ${resetUrl}
-      
-      This link will expire in 15 minutes.
-      
-      If you didn't request this reset, please ignore this email.
-      
-      Best regards,
-      Your App Team
+${brandName} password reset
+
+Hi ${userName},
+
+Use the link below to create a new password:
+${resetUrl}
+
+This link expires in 15 minutes. If you didn’t request it, ignore this email.
+
+— The ${brandName} team
     `
   };
 
@@ -120,10 +105,11 @@ const sendPasswordResetEmail = async (email, resetToken, userName = 'User') => {
  * @param {string} userName - User's name
  */
 const sendWelcomeEmail = async (email, userName) => {
+  const brandName = process.env.EMAIL_FROM_NAME || 'Fancy';
   const data = {
-    from: `${process.env.EMAIL_FROM_NAME || 'Your App'} <${process.env.MAILGUN_FROM_EMAIL}>`,
+    from: `${brandName} <${process.env.MAILGUN_FROM_EMAIL}>`,
     to: email,
-    subject: 'Welcome to Your App!',
+    subject: `Welcome to ${brandName}!`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -132,51 +118,53 @@ const sendWelcomeEmail = async (email, userName) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Welcome</title>
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #28a745; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #fff; padding: 30px; border: 1px solid #e9ecef; }
+            body { font-family:'Inter',Arial,sans-serif; line-height:1.7; color:#0f172a; margin:0; padding:0; background:#fcfbff; }
+            .container { max-width:640px; margin:0 auto; padding:32px 16px; }
+            .card { background:#fff; border-radius:32px; overflow:hidden; box-shadow:0 20px 55px rgba(15,23,42,.08); }
+            .hero { padding:40px; text-align:center; background:radial-gradient(circle at top,#fef3c7,#fdf2f8,#faf5ff); }
+            .content { padding:40px; }
             .button { 
               display: inline-block; 
-              background: #007bff; 
+              background: #ec4899; 
               color: white; 
               padding: 12px 24px; 
-              text-decoration: none; 
-              border-radius: 5px; 
-              margin: 20px 0;
+              text-decoration: none;
+              border-radius: 999px;
+              font-weight: 600;
+              margin-top: 24px;
             }
-            .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; color: #6c757d; }
+            .steps { list-style:none; padding:0; margin:24px 0; }
+            .steps li { background:#f8fafc; border-radius:18px; padding:16px 18px; margin-bottom:12px; display:flex; align-items:center; gap:12px; }
+            .steps span { background:#fff; border-radius:999px; padding:6px 12px; font-weight:600; color:#ec4899; box-shadow:inset 0 0 0 1px rgba(236,72,153,.2); }
+            .footer { padding:24px; text-align:center; font-size:13px; color:#94a3b8; }
           </style>
         </head>
         <body>
           <div class="container">
-            <div class="header">
-              <h1>🎉 Welcome to Your App!</h1>
-            </div>
-            
-            <div class="content">
-              <p>Hello ${userName},</p>
-              
-              <p>Welcome to our platform! We're excited to have you on board.</p>
-              
-              <p>Here's what you can do next:</p>
-              <ul>
-                <li>Complete your profile</li>
-                <li>Explore our products</li>
-                <li>Start shopping</li>
-              </ul>
-              
-              <div style="text-align: center;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" class="button">Get Started</a>
+            <div class="card">
+              <div class="hero">
+                <p style="letter-spacing:.15em;text-transform:uppercase;color:#a855f7;font-size:12px;margin:0;">${brandName}</p>
+                <h1 style="margin:12px 0 0;">Your curated closet is ready</h1>
+                <p style="margin:12px 0 0;color:#475569;">We’re thrilled to style your journey.</p>
               </div>
               
-              <p>If you have any questions, feel free to contact our support team.</p>
-              
-              <p>Best regards,<br>Your App Team</p>
+              <div class="content">
+                <p>Hello ${userName},</p>
+                <p>Welcome to ${brandName}! Here’s how to dive in:</p>
+                <ul class="steps">
+                  <li><span>01</span>Browse new arrivals curated for you.</li>
+                  <li><span>02</span>Save pieces you love to wishlists.</li>
+                  <li><span>03</span>Checkout securely with PayPal or card.</li>
+                </ul>
+                <div style="text-align:center;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}" class="button">Explore ${brandName}</a>
+                </div>
+                <p style="margin-top:24px;">Need recommendations? Reply and our stylists will help.</p>
+                <p>— The ${brandName} concierge</p>
+              </div>
             </div>
-            
             <div class="footer">
-              <p>Thank you for joining us!</p>
+              <p>© ${new Date().getFullYear()} ${brandName}. Dressing every moment with intention.</p>
             </div>
           </div>
         </body>
@@ -198,4 +186,10 @@ module.exports = {
   sendPasswordResetEmail,
   sendWelcomeEmail
 };
+
+
+
+
+
+
 
