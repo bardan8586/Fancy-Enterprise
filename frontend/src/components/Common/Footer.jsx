@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { IoLogoInstagram } from "react-icons/io";
 import { RiTwitterXLine } from "react-icons/ri";
 import { TbBrandMeta } from "react-icons/tb";
@@ -25,6 +26,59 @@ const socialLinks = [
 ];
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const backendBaseUrl =
+    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, "") || "";
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    setSuccessMessage("");
+    setErrorMessage("");
+
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMessage("That doesn’t look like a valid email.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `${backendBaseUrl}/api/subscribe/subscribe`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email.trim() }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Subscription failed");
+      }
+
+      setSuccessMessage(
+        data.message || "You’re on the list! Watch your inbox 🎉"
+      );
+      setEmail("");
+    } catch (err) {
+      setErrorMessage(err.message || "Unable to subscribe right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="relative overflow-hidden text-white bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="absolute inset-0 pointer-events-none">
@@ -88,8 +142,13 @@ const Footer = () => {
             Subscribe for curated travel edits, exclusive invites, and surprise
             drops. No spam, just love.
           </p>
-          <form className="flex flex-col gap-3 sm:flex-row">
+          <form
+            className="flex flex-col gap-3 sm:flex-row"
+            onSubmit={handleSubscribe}
+          >
             <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="flex-1 px-4 py-3 text-sm text-white placeholder-white/60 rounded-2xl bg-white/10 border border-white/20 focus:outline-none focus:ring-2 focus:ring-amber-300/80"
               type="email"
               placeholder="Email address"
@@ -97,11 +156,21 @@ const Footer = () => {
             />
             <button
               type="submit"
-              className="px-6 py-3 text-sm font-semibold rounded-2xl bg-gradient-to-r from-amber-300 via-orange-400 to-rose-500 text-slate-950 shadow-[0_15px_35px_rgba(255,122,24,0.35)] hover:shadow-[0_18px_45px_rgba(255,122,24,0.45)]"
+              disabled={loading}
+              className="px-6 py-3 text-sm font-semibold rounded-2xl bg-gradient-to-r from-amber-300 via-orange-400 to-rose-500 text-slate-950 shadow-[0_15px_35px_rgba(255,122,24,0.35)] hover:shadow-[0_18px_45px_rgba(255,122,24,0.45)] disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Subscribe
+              {loading ? "Joining..." : "Subscribe"}
             </button>
           </form>
+          {(successMessage || errorMessage) && (
+            <p
+              className={`text-sm ${
+                successMessage ? "text-emerald-300" : "text-rose-300"
+              }`}
+            >
+              {successMessage || errorMessage}
+            </p>
+          )}
           <div className="flex items-center gap-4 pt-2">
             {socialLinks.map(({ icon: Icon, label, url }) => (
               <a
