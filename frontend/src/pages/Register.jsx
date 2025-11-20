@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import register from "../assets/register.webp";
 import { registerUser } from "../redux/slices/authSlice";
@@ -12,7 +12,9 @@ const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, guestId, loading } = useSelector((state) => state.auth);
+  const { user, guestId, loading, error, validationErrors } = useSelector(
+    (state) => state.auth
+  );
   const { cart } = useSelector((state) => state.cart);
 
   // Get redirect parameter and check if it's checkout or something
@@ -30,6 +32,14 @@ const Register = () => {
       }
     }
   }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
+
+  const fieldError = useMemo(() => {
+    if (!validationErrors) return {};
+    return validationErrors.reduce((acc, curr) => {
+      acc[curr.param] = curr.msg;
+      return acc;
+    }, {});
+  }, [validationErrors]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -50,15 +60,26 @@ const Register = () => {
           <p className="mb-6 text-center">
             Enter your username and password to Login.
           </p>
+          {error && (
+            <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg">
+              {error}
+            </div>
+          )}
           <div className="mb-4">
             <label className="block mb-2 text-sm font-semibold">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border rounded"
+              className={`w-full p-2 border rounded ${
+                fieldError.name ? "border-red-400" : ""
+              }`}
               placeholder="Enter your Name"
+              aria-invalid={Boolean(fieldError.name)}
             />
+            {fieldError.name && (
+              <p className="mt-1 text-sm text-red-500">{fieldError.name}</p>
+            )}
           </div>
           <div className="mb-4">
             <label className="block mb-2 text-sm font-semibold">Email</label>
@@ -66,9 +87,15 @@ const Register = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
+              className={`w-full p-2 border rounded ${
+                fieldError.email ? "border-red-400" : ""
+              }`}
               placeholder="Enter your email address"
+              aria-invalid={Boolean(fieldError.email)}
             />
+            {fieldError.email && (
+              <p className="mt-1 text-sm text-red-500">{fieldError.email}</p>
+            )}
           </div>
           <div className="mb-4">
             <label className="block mb-2 text-sm font-semibold">Password</label>
@@ -76,9 +103,15 @@ const Register = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
+              className={`w-full p-2 border rounded ${
+                fieldError.password ? "border-red-400" : ""
+              }`}
               placeholder="Enter your password"
+              aria-invalid={Boolean(fieldError.password)}
             />
+            {fieldError.password && (
+              <p className="mt-1 text-sm text-red-500">{fieldError.password}</p>
+            )}
           </div>
           <button
             type="submit"

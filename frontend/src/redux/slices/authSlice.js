@@ -63,6 +63,7 @@ const initialState = {
   guestId: initialGuestId,
   loading: false,
   error: null,
+  validationErrors: null,
 };
 
 // Async Thunk for User Login
@@ -79,7 +80,9 @@ export const loginUser = createAsyncThunk(
 
       return response.data.user; // Return the user object from the response
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || { message: error.message || "Login failed" }
+      );
     }
   }
 );
@@ -98,7 +101,9 @@ export const registerUser = createAsyncThunk(
 
       return response.data.user; // Return the user object from the response
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || { message: error.message || "Registration failed" }
+      );
     }
   }
 );
@@ -132,26 +137,32 @@ const authSlice = createSlice({
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.validationErrors = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.validationErrors = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Login failed";
+        state.validationErrors = action.payload?.errors || null;
       })
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.validationErrors = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload;
+        state.validationErrors = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error = action.payload?.message || "Registration failed";
+        state.validationErrors = action.payload?.errors || null;
       });
   },
 });
