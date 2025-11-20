@@ -50,10 +50,10 @@ const Navbar = () => {
             <img
               src={FancyLogo}
               alt="Fancy logo"
-              className="w-12 h-12 rounded-full object-cover shadow-sm border border-white/60"
+              className="w-16 h-16 rounded-full object-cover shadow-lg border-2 border-white/70"
               loading="lazy"
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent tracking-wide">
+            <span className="text-3xl font-bold bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 bg-clip-text text-transparent tracking-wide">
               FANCY
             </span>
           </Link>
@@ -176,7 +176,7 @@ const Navbar = () => {
                   <img
                     src={FancyLogo}
                     alt="Fancy logo"
-                    className="w-10 h-10 rounded-full object-cover border border-white/70 shadow"
+                    className="w-12 h-12 rounded-full object-cover border border-white/70 shadow"
                   />
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Fancy</p>

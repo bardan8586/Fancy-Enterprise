@@ -15,6 +15,7 @@ const Register = () => {
   const { user, guestId, loading, error, validationErrors } = useSelector(
     (state) => state.auth
   );
+  const [clientErrors, setClientErrors] = useState({});
   const { cart } = useSelector((state) => state.cart);
 
   // Get redirect parameter and check if it's checkout or something
@@ -33,7 +34,7 @@ const Register = () => {
     }
   }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
 
-  const fieldError = useMemo(() => {
+  const serverFieldErrors = useMemo(() => {
     if (!validationErrors) return {};
     return validationErrors.reduce((acc, curr) => {
       acc[curr.param] = curr.msg;
@@ -41,8 +42,42 @@ const Register = () => {
     }, {});
   }, [validationErrors]);
 
+  const fieldError = useMemo(() => {
+    return { ...serverFieldErrors, ...clientErrors };
+  }, [serverFieldErrors, clientErrors]);
+
+  const clearClientError = (field) => {
+    if (!clientErrors[field]) return;
+    setClientErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!name.trim()) {
+      newErrors.name = "Name is required";
+    }
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.email = "Enter a valid email address";
+    }
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setClientErrors(newErrors);
+      return;
+    }
+
+    setClientErrors({});
     dispatch(registerUser({ name, email, password }));
   };
 
@@ -70,7 +105,10 @@ const Register = () => {
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearClientError("name");
+              }}
               className={`w-full p-2 border rounded ${
                 fieldError.name ? "border-red-400" : ""
               }`}
@@ -86,7 +124,10 @@ const Register = () => {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearClientError("email");
+              }}
               className={`w-full p-2 border rounded ${
                 fieldError.email ? "border-red-400" : ""
               }`}
@@ -102,7 +143,10 @@ const Register = () => {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearClientError("password");
+              }}
               className={`w-full p-2 border rounded ${
                 fieldError.password ? "border-red-400" : ""
               }`}

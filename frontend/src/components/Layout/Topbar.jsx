@@ -23,10 +23,8 @@ const Topbar = () => {
             We ship our products worldwide- Very Fast and Reiable Shopping
           </span>
         </div>
-        <div className="hidden text-sm md:block">
-          <a href="tel:0451451697" className="hover:text-gray-300">
-            0451451697
-          </a>
+        <div className="hidden text-sm md:block text-white/70">
+          Need help? <span className="font-semibold text-white">Concierge 24/7</span>
         </div>
       </div>
     </div>

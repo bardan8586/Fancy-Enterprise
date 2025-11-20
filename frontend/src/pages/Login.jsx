@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import login from "../assets/login.jpg";
 import { loginUser } from "../redux/slices/authSlice";
@@ -11,8 +11,11 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, guestId, loading } = useSelector((state) => state.auth);
+  const { user, guestId, loading, error, validationErrors } = useSelector(
+    (state) => state.auth
+  );
   const { cart } = useSelector((state) => state.cart);
+  const [clientErrors, setClientErrors] = useState({});
 
   // Get redirect parameter and check if it's checkout or something
   const redirect = new URLSearchParams(location.search).get("redirect") || "/";
@@ -30,8 +33,45 @@ const Login = () => {
     }
   }, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
 
+  const serverFieldErrors = useMemo(() => {
+    if (!validationErrors) return {};
+    return validationErrors.reduce((acc, curr) => {
+      acc[curr.param] = curr.msg;
+      return acc;
+    }, {});
+  }, [validationErrors]);
+
+  const fieldError = useMemo(() => {
+    return { ...serverFieldErrors, ...clientErrors };
+  }, [serverFieldErrors, clientErrors]);
+
+  const clearClientError = (field) => {
+    if (!clientErrors[field]) return;
+    setClientErrors((prev) => {
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      newErrors.email = "Enter a valid email address";
+    }
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setClientErrors(newErrors);
+      return;
+    }
+
+    setClientErrors({});
     dispatch(loginUser({ email, password }));
   };
 
@@ -58,6 +98,11 @@ const Login = () => {
           <p className="mb-8 text-center text-slate-500">
             Sign in to unlock curated drops, wishlists, and seamless checkout.
           </p>
+          {error && (
+            <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-2xl">
+              {error}
+            </div>
+          )}
           <div className="mb-4">
             <label className="block mb-2 text-sm font-semibold text-slate-600">
               Email
@@ -65,10 +110,19 @@ const Login = () => {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearClientError("email");
+              }}
+              className={`w-full p-3 text-sm border rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none ${
+                fieldError.email ? "border-red-400" : "border-slate-200"
+              }`}
               placeholder="Enter your email address"
+              aria-invalid={Boolean(fieldError.email)}
             />
+            {fieldError.email && (
+              <p className="mt-1 text-sm text-red-500">{fieldError.email}</p>
+            )}
           </div>
           <div className="mb-4">
             <label className="block mb-2 text-sm font-semibold text-slate-600">
@@ -77,10 +131,19 @@ const Login = () => {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-3 text-sm border border-slate-200 rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none"
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearClientError("password");
+              }}
+              className={`w-full p-3 text-sm border rounded-2xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none ${
+                fieldError.password ? "border-red-400" : "border-slate-200"
+              }`}
               placeholder="Enter your password"
+              aria-invalid={Boolean(fieldError.password)}
             />
+            {fieldError.password && (
+              <p className="mt-1 text-sm text-red-500">{fieldError.password}</p>
+            )}
           </div>
           <button
             type="submit"
