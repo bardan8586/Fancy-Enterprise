@@ -96,3 +96,11 @@ When you're ready to scale:
 
 **Gmail SMTP is perfect for development and small projects!** 🚀
 
+
+
+
+
+
+
+
+

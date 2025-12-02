@@ -2,45 +2,55 @@ const mongoose = require("mongoose");
 
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: true,
-        trim: true,
-    }, 
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true,
-        match: [/.+\@.+\..+/, "Please enter a valid email address"],
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      match: [/.+\@.+\..+/, "Please enter a valid email address"],
     },
 
     password: {
-        type: String,
-        required: true,
-        minLength: 6,
+      type: String,
+      required: true,
+      minLength: 6,
     },
-    
+
     role: {
-        type: String,
-        enum: ["customer", "admin"],
-        default: "customer",
+      type: String,
+      enum: ["customer", "admin"],
+      default: "customer",
     },
+
+    // Wishlist: list of product references the user has saved
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
 
     // Password reset fields
     resetPasswordToken: {
-        type: String,
-        default: null,
+      type: String,
+      default: null,
     },
-    
+
     resetPasswordExpires: {
-        type: Date,
-        default: null,
+      type: Date,
+      default: null,
     },
-}, {timestamps: true}
-)
+  },
+  { timestamps: true }
+);
 
 //has the password 
 

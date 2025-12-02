@@ -59,7 +59,7 @@ router.post("/", protect, admin, async (req, res) => {
       return res.status(400).json({ message: "A product with this SKU already exists" });
     }
 
-    // Create product
+    // Create product data object
     const productData = {
       name,
       description,

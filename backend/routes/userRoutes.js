@@ -2,6 +2,7 @@
 
 const express = require("express");
 const User = require("../models/User");
+const Product = require("../models/Product");
 const router = express.Router();
 
 const jwt = require("jsonwebtoken");
@@ -99,6 +100,7 @@ router.post("/login", authLimiter, validateUserLogin, asyncHandler(async (req, r
             name: user.name,
             email: user.email,
             role: user.role,
+            wishlist: user.wishlist || [],
           },
           token,
         });
@@ -113,7 +115,7 @@ router.post("/login", authLimiter, validateUserLogin, asyncHandler(async (req, r
 // @desc Get user profile
 // @access Private
 router.get("/profile", protect, asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select("-password");
+  const user = await User.findById(req.user._id).select("-password").populate("wishlist");
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
@@ -151,9 +153,97 @@ router.put("/profile", protect, asyncHandler(async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      wishlist: updatedUser.wishlist || [],
     },
   });
 }));
+
+// @route GET /api/users/wishlist
+// @desc Get logged in user's wishlist (full product details)
+// @access Private
+router.get(
+  "/wishlist",
+  protect,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).populate("wishlist");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      items: user.wishlist || [],
+    });
+  })
+);
+
+// @route POST /api/users/wishlist/:productId
+// @desc Add product to wishlist
+// @access Private
+router.post(
+  "/wishlist/:productId",
+  protect,
+  asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const alreadyInWishlist = user.wishlist?.some(
+      (pId) => pId.toString() === productId
+    );
+
+    if (!alreadyInWishlist) {
+      user.wishlist = [...(user.wishlist || []), productId];
+      await user.save();
+    }
+
+    const populatedUser = await User.findById(req.user._id).populate("wishlist");
+
+    res.status(200).json({
+      success: true,
+      message: "Added to wishlist",
+      items: populatedUser.wishlist || [],
+    });
+  })
+);
+
+// @route DELETE /api/users/wishlist/:productId
+// @desc Remove product from wishlist
+// @access Private
+router.delete(
+  "/wishlist/:productId",
+  protect,
+  asyncHandler(async (req, res) => {
+    const { productId } = req.params;
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.wishlist = (user.wishlist || []).filter(
+      (pId) => pId.toString() !== productId
+    );
+    await user.save();
+
+    const populatedUser = await User.findById(req.user._id).populate("wishlist");
+
+    res.status(200).json({
+      success: true,
+      message: "Removed from wishlist",
+      items: populatedUser.wishlist || [],
+    });
+  })
+);
 
 // @route POST /api/users/forgot-password
 // @desc Send password reset email

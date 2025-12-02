@@ -33,6 +33,12 @@ const Profile = () => {
             </h1>
             <p className="mb-4 text-lg text-gray-600">{user?.email}</p>
             <button
+              onClick={() => navigate("/wishlist")}
+              className="w-full px-4 py-2 mb-3 text-white bg-black rounded hover:bg-gray-900"
+            >
+              View Wishlist
+            </button>
+            <button
               onClick={handleLogout}
               className="w-full px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
             >
