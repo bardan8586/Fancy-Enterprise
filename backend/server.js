@@ -70,8 +70,13 @@ app.use('/uploads', (req, res, next) => {
 }, express.static('uploads'));
 
 // CORS configuration
+// For simplicity and to avoid environment mismatch issues in production,
+// allow the requesting origin and include credentials.
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl) or any browser origin
+    callback(null, true);
+  },
   credentials: true,
   optionsSuccessStatus: 200,
 };
