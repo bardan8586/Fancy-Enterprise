@@ -5,6 +5,7 @@ const User = require("../models/User");
 const router = express.Router();
 
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const { protect } = require("../middleware/authMiddleware");
 const { asyncHandler } = require("../middleware/errorHandler");
 const { authLimiter } = require("../middleware/security");
@@ -12,6 +13,7 @@ const {
   validateUserRegistration, 
   validateUserLogin 
 } = require("../middleware/validation");
+const { sendPasswordResetEmail } = require("../services/gmailService");
 
 // @route POST /api/users/register
 // @desc Register a new user
@@ -305,6 +307,110 @@ router.get("/wishlist", protect, asyncHandler(async (req, res) => {
     success: true,
     wishlist: user.wishlist || [],
   });
+}));
+
+// @route POST /api/users/forgot-password
+// @desc Send password reset email
+// @access Public
+router.post("/forgot-password", authLimiter, asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email is required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return res.json({
+        success: true,
+        message: "If that email exists, we've sent password reset instructions.",
+      });
+    }
+
+    // Don't allow password reset for Google users
+    if (user.provider === "google") {
+      return res.status(400).json({
+        message: "This account uses Google Sign-In. Please sign in with Google.",
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+
+    // Save token to user
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await user.save();
+
+    // Send email
+    try {
+      await sendPasswordResetEmail(email, resetToken, user.name);
+      res.json({
+        success: true,
+        message: "Password reset instructions sent to your email",
+      });
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      // Clear token if email fails
+      user.resetToken = undefined;
+      user.resetTokenExpiry = undefined;
+      await user.save();
+      
+      return res.status(500).json({
+        message: "Failed to send email. Please try again later.",
+      });
+    }
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    throw error;
+  }
+}));
+
+// @route POST /api/users/reset-password/:token
+// @desc Reset password with token
+// @access Public
+router.post("/reset-password/:token", authLimiter, asyncHandler(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: "Password is required" });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: Date.now() }, // Token not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Update password
+    user.password = password;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    throw error;
+  }
 }));
 
 module.exports = router;

@@ -29,12 +29,50 @@ const subscribeRoutes = require("./routes/subscribeRoute");
 const uploadRoutes = require("./routes/uploadRoutes");
 
 const app = express();
+const path = require("path");
 
 // Trust proxy for accurate IP addresses
 app.set("trust proxy", 1);
 
 // Security middleware
 app.use(securityHeaders);
+
+// Serve static files from uploads directory with CORS headers
+app.use("/uploads", (req, res, next) => {
+  // Set CORS headers for images
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+  ].filter(Boolean);
+
+  if (process.env.NODE_ENV === "production") {
+    if (origin === process.env.FRONTEND_URL) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+    } else if (!origin) {
+      // Allow requests with no origin (direct image loads)
+      res.setHeader("Access-Control-Allow-Origin", "*");
+    }
+  } else {
+    // In development, allow all origins
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  }
+
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  
+  next();
+}, express.static(path.join(__dirname, "uploads")));
 
 // Request logging
 if (process.env.NODE_ENV === "development") {

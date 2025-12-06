@@ -2,14 +2,21 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // fetch all users (admin only)
-export const fetchUsers = createAsyncThunk("admin/fetchUsers", async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_BACKEND_URL}/api/admin/users`,
-    {
-      headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
-    }
-  );
-  return response.data;
+export const fetchUsers = createAsyncThunk("admin/fetchUsers", async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACKEND_URL}/api/admin/users`,
+      {
+        headers: { Authorization: `Bearer ${localStorage.getItem("userToken")}` },
+      }
+    );
+    // Handle both old format (array) and new format (object with users property)
+    return response.data.users || response.data;
+  } catch (error) {
+    return rejectWithValue(
+      error.response?.data?.message || error.message || "Failed to fetch users"
+    );
+  }
 });
 
 // Add the create user action
@@ -82,7 +89,7 @@ const adminSlice = createSlice({
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error?.message || "Failed to fetch users";
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         const updatedUser = action.payload;

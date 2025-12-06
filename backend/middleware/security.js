@@ -60,13 +60,14 @@ const securityHeaders = helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:", "http:"],
+      imgSrc: ["'self'", "data:", "https:", "http:", "blob:"],
       scriptSrc: ["'self'"],
       connectSrc: ["'self'", "https://api.paypal.com", "https://www.paypal.com"],
       frameSrc: ["'self'", "https://www.paypal.com"],
     },
   },
   crossOriginEmbedderPolicy: false, // Disable for PayPal integration
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin images
 });
 
 // IP whitelist for admin operations (optional)

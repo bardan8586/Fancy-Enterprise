@@ -9,11 +9,18 @@ const router = express.Router();
 // @access Private/Admin
 router.get("/users", protect, admin, async (req, res) => {
   try {
-    const users = await User.find({});
-    res.json(users);
+    const users = await User.find({}).select("-password -wishlist");
+    res.json({
+      success: true,
+      users: users,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server Error",
+      error: error.message 
+    });
   }
 });
 
@@ -37,7 +44,15 @@ router.post("/users", protect, admin, async (req, res) => {
     });
 
     await user.save();
-    res.status(201).json({ message: "User created successfully", user });
+    // Return user without password
+    const userResponse = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      createdAt: user.createdAt,
+    };
+    res.status(201).json({ message: "User created successfully", user: userResponse });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
@@ -56,7 +71,16 @@ router.put("/users/:id", protect, admin, async (req, res) => {
       user.role = req.body.role || user.role;
     }
     const updatedUser = await user.save();
-    res.json({ message: "User updated successfully", user: updatedUser });
+    // Return user without password
+    const userResponse = {
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      createdAt: updatedUser.createdAt,
+      updatedAt: updatedUser.updatedAt,
+    };
+    res.json({ message: "User updated successfully", user: userResponse });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server Error" });
