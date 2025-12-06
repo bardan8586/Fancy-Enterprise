@@ -3,8 +3,45 @@ import { motion } from "framer-motion";
 import { getDisplayImage } from "../../utils/imageUtils";
 import { ProductGridSkeleton } from "../Common/LoadingStates";
 import OptimizedImage from "../Common/OptimizedImage";
+import { useDispatch, useSelector } from "react-redux";
+import { addToWishlist, removeFromWishlist, fetchWishlist } from "../../redux/slices/wishlistSlice";
+import { HiHeart, HiOutlineHeart } from "react-icons/hi2";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const ProductCard = ({ product, index }) => {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
+  const isInWishlist = wishlistItems.some((item) => item._id === product._id);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchWishlist());
+    }
+  }, [user, dispatch]);
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error("Please login to add items to wishlist");
+      return;
+    }
+
+    try {
+      if (isInWishlist) {
+        await dispatch(removeFromWishlist(product._id)).unwrap();
+        toast.success("Removed from wishlist");
+      } else {
+        await dispatch(addToWishlist(product._id)).unwrap();
+        toast.success("Added to wishlist");
+      }
+    } catch (error) {
+      toast.error(error || "Something went wrong");
+    }
+  };
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const discountPercentage = hasDiscount 
     ? Math.round((1 - product.discountPrice / product.price) * 100)
@@ -45,6 +82,21 @@ const ProductCard = ({ product, index }) => {
                 -{discountPercentage}%
               </motion.div>
             )}
+
+            {/* Wishlist Button */}
+            <motion.button
+              onClick={handleWishlistToggle}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-colors z-10"
+              aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            >
+              {isInWishlist ? (
+                <HiHeart className="w-5 h-5 text-red-500" />
+              ) : (
+                <HiOutlineHeart className="w-5 h-5 text-gray-700" />
+              )}
+            </motion.button>
           </div>
 
           {/* Product Info */}

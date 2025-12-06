@@ -3,6 +3,7 @@ import {
   HiOutlineUser,
   HiOutlineShoppingBag,
   HiBars3BottomRight,
+  HiOutlineHeart,
 } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
@@ -19,6 +20,7 @@ const Navbar = () => {
 
   const { user } = useSelector((state) => state.auth);
   const { cart } = useSelector((state) => state.cart);
+  const { items: wishlistItems } = useSelector((state) => state.wishlist);
 
   //get the cart item count from the cart
   const cartItemCount =
@@ -102,6 +104,29 @@ const Navbar = () => {
           >
             <Link to="/profile" className="p-2 rounded-full hover:bg-slate-100 transition-colors duration-200">
               <HiOutlineUser className="w-6 h-6 text-slate-700" />
+            </Link>
+          </motion.div>
+
+          {/* Wishlist Icon */}
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/wishlist" className="relative p-2 rounded-full hover:bg-slate-100 transition-colors duration-200">
+              <HiOutlineHeart className="w-6 h-6 text-slate-700" />
+              <AnimatePresence>
+                {wishlistItems.length > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    exit={{ scale: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold text-white transform rounded-full bg-red-500 min-w-[20px] h-5"
+                  >
+                    {wishlistItems.length}
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </Link>
           </motion.div>
 

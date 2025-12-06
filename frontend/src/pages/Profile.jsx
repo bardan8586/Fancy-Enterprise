@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { logout } from "../redux/slices/authSlice";
 import { clearCart } from "../redux/slices/cartSlice";
+import { clearWishlist } from "../redux/slices/wishlistSlice";
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
@@ -19,6 +20,7 @@ const Profile = () => {
   const handleLogout = () => {
     dispatch(logout());
     dispatch(clearCart());
+    dispatch(clearWishlist());
     navigate("/login");
   };
 

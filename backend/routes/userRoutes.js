@@ -228,4 +228,83 @@ router.put("/profile", protect, asyncHandler(async (req, res) => {
   });
 }));
 
+// @route POST /api/users/wishlist
+// @desc Add product to wishlist
+// @access Private
+router.post("/wishlist", protect, asyncHandler(async (req, res) => {
+  const { productId } = req.body;
+  
+  if (!productId) {
+    return res.status(400).json({ message: "Product ID is required" });
+  }
+
+  const user = await User.findById(req.user._id);
+  
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // Check if product is already in wishlist
+  if (user.wishlist.includes(productId)) {
+    return res.status(400).json({ message: "Product already in wishlist" });
+  }
+
+  // Add product to wishlist
+  user.wishlist.push(productId);
+  await user.save();
+
+  // Populate wishlist with product details
+  await user.populate("wishlist");
+
+  res.json({
+    success: true,
+    message: "Product added to wishlist",
+    wishlist: user.wishlist,
+  });
+}));
+
+// @route DELETE /api/users/wishlist/:productId
+// @desc Remove product from wishlist
+// @access Private
+router.delete("/wishlist/:productId", protect, asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  
+  const user = await User.findById(req.user._id);
+  
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  // Remove product from wishlist
+  user.wishlist = user.wishlist.filter(
+    (id) => id.toString() !== productId
+  );
+  await user.save();
+
+  // Populate wishlist with product details
+  await user.populate("wishlist");
+
+  res.json({
+    success: true,
+    message: "Product removed from wishlist",
+    wishlist: user.wishlist,
+  });
+}));
+
+// @route GET /api/users/wishlist
+// @desc Get user's wishlist
+// @access Private
+router.get("/wishlist", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id).populate("wishlist");
+  
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  res.json({
+    success: true,
+    wishlist: user.wishlist || [],
+  });
+}));
+
 module.exports = router;
