@@ -4,8 +4,6 @@ import Home from "./pages/Home";
 import { Toaster } from "sonner";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import CollectionPage from "./pages/CollectionPage";
 import ProductDetails from "./components/Products/ProductDetails";
@@ -13,7 +11,6 @@ import Checkout from "./components/Cart/Checkout";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
-import WishlistPage from "./pages/WishlistPage";
 import AdminLayout from "./components/Admin/AdminLayout";
 import AdminHomePage from "./pages/AdminHomePage";
 import UserManagement from "./components/Admin/UserManagement";
@@ -37,8 +34,6 @@ const App = () => {
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
-            <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="reset-password/:token" element={<ResetPassword />} />
             <Route path="profile" element={<Profile />} />
             <Route
               path="collections/:collection"
@@ -52,7 +47,6 @@ const App = () => {
             />
             <Route path="order/:id" element={<OrderDetailsPage />} />
             <Route path="my-orders" element={<MyOrdersPage />} />
-            <Route path="wishlist" element={<WishlistPage />} />
           </Route>
           <Route
             path="/admin"

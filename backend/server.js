@@ -1,4 +1,3 @@
-//9XKE7XNA73Y4NKHMGRPV1QNHi 
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -48,34 +47,49 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Serve static files from uploads directory with CORS headers
-app.use('/uploads', (req, res, next) => {
-  // Set CORS headers for static files
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  // Allow cross-origin resource usage for images
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  // For completeness, allow embedding if needed
-  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
-  
-  next();
-}, express.static('uploads'));
-
 // CORS configuration
-// For simplicity and to avoid environment mismatch issues in production,
-// allow the requesting origin and include credentials.
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl) or any browser origin
-    callback(null, true);
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173", // Vite default
+      "http://localhost:3000", // React default
+      "http://localhost:5174", // Vite alternate
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:3000",
+    ].filter(Boolean); // Remove undefined values
+
+    // In production, be more strict - only allow configured FRONTEND_URL
+    if (process.env.NODE_ENV === "production") {
+      const productionOrigin = process.env.FRONTEND_URL;
+      if (productionOrigin && origin === productionOrigin) {
+        return callback(null, true);
+      }
+      // In production, if FRONTEND_URL is not set, log warning but allow (for flexibility)
+      if (!productionOrigin) {
+        console.warn("⚠️  WARNING: FRONTEND_URL not set in production. Allowing origin:", origin);
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    }
+
+    // In development, allow all common localhost origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // For development, also allow any localhost origin for flexibility
+    if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+      return callback(null, true);
+    }
+
+    // If origin doesn't match, reject it
+    callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   optionsSuccessStatus: 200,

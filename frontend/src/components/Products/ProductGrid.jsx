@@ -1,39 +1,14 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "sonner";
 import { getDisplayImage } from "../../utils/imageUtils";
 import { ProductGridSkeleton } from "../Common/LoadingStates";
 import OptimizedImage from "../Common/OptimizedImage";
-import { addToWishlist, removeFromWishlist } from "../../redux/slices/wishlistSlice";
 
 const ProductCard = ({ product, index }) => {
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const discountPercentage = hasDiscount 
     ? Math.round((1 - product.discountPrice / product.price) * 100)
     : 0;
-
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const { items: wishlistItems } = useSelector((state) => state.wishlist);
-
-  const isInWishlist = wishlistItems?.some((item) => item._id === product._id);
-
-  const handleWishlistClick = (e) => {
-    e.preventDefault(); // prevent navigating to product page when clicking heart
-    if (!user) {
-      toast.info("Sign in to save favorites", { duration: 1600 });
-      return;
-    }
-
-    if (isInWishlist) {
-      dispatch(removeFromWishlist(product._id));
-      toast("Removed from wishlist", { duration: 1400 });
-    } else {
-      dispatch(addToWishlist(product._id));
-      toast.success("Added to wishlist", { duration: 1400 });
-    }
-  };
 
   return (
     <motion.div
@@ -70,31 +45,6 @@ const ProductCard = ({ product, index }) => {
                 -{discountPercentage}%
               </motion.div>
             )}
-
-            {/* Wishlist Button */}
-            <motion.button
-              type="button"
-              onClick={handleWishlistClick}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            >
-              <svg
-                className={`w-5 h-5 ${
-                  isInWishlist ? "text-red-500 fill-red-500" : "text-gray-700"
-                }`}
-                fill={isInWishlist ? "currentColor" : "none"}
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-            </motion.button>
           </div>
 
           {/* Product Info */}
