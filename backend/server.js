@@ -1,4 +1,3 @@
-//9XKE7XNA73Y4NKHMGRPV1QNHi 
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -48,35 +47,9 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Serve static files from uploads directory with CORS headers
-app.use('/uploads', (req, res, next) => {
-  // Set CORS headers for static files
-  res.header('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  // Allow cross-origin resource usage for images
-  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
-  // For completeness, allow embedding if needed
-  res.header('Cross-Origin-Embedder-Policy', 'require-corp');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-    return;
-  }
-  
-  next();
-}, express.static('uploads'));
-
 // CORS configuration
-// For simplicity and to avoid environment mismatch issues in production,
-// allow the requesting origin and include credentials.
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl) or any browser origin
-    callback(null, true);
-  },
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true,
   optionsSuccessStatus: 200,
 };
