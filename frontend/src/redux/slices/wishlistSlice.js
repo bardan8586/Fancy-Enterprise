@@ -136,3 +136,4 @@ export const { clearWishlistState } = wishlistSlice.actions;
 export default wishlistSlice.reducer;
 
 
+
