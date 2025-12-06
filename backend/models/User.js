@@ -19,8 +19,22 @@ const userSchema = new mongoose.Schema({
 
     password: {
         type: String,
-        required: true,
+        required: function() {
+            return !this.googleId; // Password required only if not a Google user
+        },
         minLength: 6,
+    },
+    
+    googleId: {
+        type: String,
+        sparse: true, // Allows multiple null values but enforces uniqueness when present
+        unique: true,
+    },
+    
+    provider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local",
     },
     
     role: {
@@ -31,10 +45,13 @@ const userSchema = new mongoose.Schema({
 }, {timestamps: true}
 )
 
-//has the password 
+// Hash the password (only for local users)
 
 userSchema.pre("save", async function(next) {
-    if(!this.isModified("password")) return next();
+    // Skip password hashing if password is not modified or user is Google user
+    if(!this.isModified("password") || this.provider === "google") return next();
+    if (!this.password) return next(); // Skip if no password (Google user)
+    
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();

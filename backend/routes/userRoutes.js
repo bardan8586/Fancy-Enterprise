@@ -115,6 +115,87 @@ router.get("/profile", protect, asyncHandler(async (req, res) => {
   });
 }));
 
+// @route POST /api/users/google-auth
+// @desc Authenticate user with Google
+// @access Public
+router.post("/google-auth", authLimiter, asyncHandler(async (req, res) => {
+  const { tokenId } = req.body;
+
+  if (!tokenId) {
+    return res.status(400).json({ message: "Google token is required" });
+  }
+
+  try {
+    // Verify Google token
+    const { OAuth2Client } = require("google-auth-library");
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    // Check if user exists with this email
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists - check if they have Google ID
+      if (!user.googleId) {
+        // Link Google account to existing user
+        user.googleId = googleId;
+        user.provider = "google";
+        await user.save();
+      } else if (user.googleId !== googleId) {
+        return res.status(400).json({ 
+          message: "This email is already associated with another Google account" 
+        });
+      }
+    } else {
+      // Create new user with Google
+      user = new User({
+        name,
+        email,
+        googleId,
+        provider: "google",
+        role: "customer",
+      });
+      await user.save();
+    }
+
+    // Create JWT payload
+    const jwtPayload = { user: { id: user._id, role: user.role } };
+
+    // Sign and return the token
+    jwt.sign(
+      jwtPayload,
+      process.env.JWT_SECRET,
+      { expiresIn: "45h" },
+      (err, token) => {
+        if (err) throw err;
+
+        res.status(201).json({
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+          token,
+        });
+      }
+    );
+  } catch (error) {
+    console.error("Google auth error:", error);
+    if (error.message && error.message.includes("Invalid token")) {
+      return res.status(400).json({ message: "Invalid Google token" });
+    }
+    throw error;
+  }
+}));
+
 // @route PUT /api/users/profile
 // @desc Update user profile
 // @access Private

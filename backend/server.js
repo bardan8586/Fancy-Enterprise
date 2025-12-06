@@ -67,14 +67,14 @@ const corsOptions = {
     // In production, be more strict - only allow configured FRONTEND_URL
     if (process.env.NODE_ENV === "production") {
       const productionOrigin = process.env.FRONTEND_URL;
-      if (productionOrigin && origin === productionOrigin) {
-        return callback(null, true);
-      }
-      // In production, if FRONTEND_URL is not set, log warning but allow (for flexibility)
       if (!productionOrigin) {
-        console.warn("⚠️  WARNING: FRONTEND_URL not set in production. Allowing origin:", origin);
+        console.error("❌ ERROR: FRONTEND_URL is required in production!");
+        return callback(new Error("Server misconfiguration: FRONTEND_URL not set"));
+      }
+      if (origin === productionOrigin) {
         return callback(null, true);
       }
+      // Reject all other origins in production
       return callback(new Error("Not allowed by CORS"));
     }
 

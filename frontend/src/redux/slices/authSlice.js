@@ -108,6 +108,27 @@ export const registerUser = createAsyncThunk(
   }
 );
 
+// Async Thunk for Google Authentication
+export const googleLogin = createAsyncThunk(
+  "auth/googleLogin",
+  async (tokenId, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/users/google-auth`,
+        { tokenId }
+      );
+      localStorage.setItem("userInfo", JSON.stringify(response.data.user));
+      localStorage.setItem("userToken", response.data.token);
+
+      return response.data.user;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: error.message || "Google authentication failed" }
+      );
+    }
+  }
+);
+
 // Slice
 const authSlice = createSlice({
   name: "auth",
@@ -163,6 +184,21 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || "Registration failed";
         state.validationErrors = action.payload?.errors || null;
+      })
+      .addCase(googleLogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.validationErrors = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.validationErrors = null;
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Google authentication failed";
+        state.validationErrors = null;
       });
   },
 });

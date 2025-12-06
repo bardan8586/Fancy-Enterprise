@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import login from "../assets/login.jpg";
-import { loginUser } from "../redux/slices/authSlice";
+import { loginUser, googleLogin } from "../redux/slices/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { mergeCart } from "../redux/slices/cartSlice";
+import { toast } from "sonner";
+import GoogleSignInButton from "../components/Common/GoogleSignInButton";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -73,6 +75,16 @@ const Login = () => {
 
     setClientErrors({});
     dispatch(loginUser({ email, password }));
+  };
+
+  // Handle Google Sign-In with credential
+  const handleGoogleCredentialResponse = async (credential) => {
+    try {
+      await dispatch(googleLogin(credential)).unwrap();
+      toast.success("Signed in with Google successfully!");
+    } catch (error) {
+      toast.error(error.message || "Google sign-in failed");
+    }
   };
 
   return (
@@ -151,6 +163,20 @@ const Login = () => {
           >
             {loading ? "loading..." : "Sign In"}
           </button>
+          
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-200"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-slate-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Sign-In Button */}
+          <GoogleSignInButton onSuccess={handleGoogleCredentialResponse} />
+          
           <div className="mt-4 text-center">
             <Link
               to="/forgot-password"
