@@ -49,7 +49,48 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const allowedOrigins = [
+      process.env.FRONTEND_URL,
+      "http://localhost:5173", // Vite default
+      "http://localhost:3000", // React default
+      "http://localhost:5174", // Vite alternate
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:3000",
+    ].filter(Boolean); // Remove undefined values
+
+    // In production, be more strict - only allow configured FRONTEND_URL
+    if (process.env.NODE_ENV === "production") {
+      const productionOrigin = process.env.FRONTEND_URL;
+      if (productionOrigin && origin === productionOrigin) {
+        return callback(null, true);
+      }
+      // In production, if FRONTEND_URL is not set, log warning but allow (for flexibility)
+      if (!productionOrigin) {
+        console.warn("⚠️  WARNING: FRONTEND_URL not set in production. Allowing origin:", origin);
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    }
+
+    // In development, allow all common localhost origins
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // For development, also allow any localhost origin for flexibility
+    if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+      return callback(null, true);
+    }
+
+    // If origin doesn't match, reject it
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
   optionsSuccessStatus: 200,
 };
