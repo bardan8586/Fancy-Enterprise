@@ -128,7 +128,7 @@ const Navbar = () => {
           </motion.button>
 
           {/* Search Icon */}
-          <div className="overflow-hidden">
+          <div className="relative">
             <SearchBar />
           </div>
 

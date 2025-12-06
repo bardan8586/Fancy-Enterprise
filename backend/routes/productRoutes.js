@@ -208,9 +208,16 @@ router.get("/", async (req, res) => {
     }
 
     if (search) {
+      // Search across multiple fields: name, description, brand, category, tags, material, sku
+      const searchRegex = new RegExp(search, "i");
       query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
+        { name: searchRegex },
+        { description: searchRegex },
+        { brand: searchRegex },
+        { category: searchRegex },
+        { material: searchRegex },
+        { tags: searchRegex },
+        { sku: searchRegex },
       ];
     }
 

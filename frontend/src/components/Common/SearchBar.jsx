@@ -85,7 +85,7 @@ const SearchBar = () => {
   }, [isOpen]);
 
   return (
-    <div ref={searchContainerRef} className="relative">
+    <div ref={searchContainerRef} className="relative z-50">
       <AnimatePresence>
         {isOpen && (
           <>
@@ -94,7 +94,7 @@ const SearchBar = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/20 z-40 md:hidden"
+              className="fixed inset-0 bg-black/20 z-[60] md:hidden"
               onClick={handleSearchToggle}
             />
 
@@ -104,7 +104,7 @@ const SearchBar = () => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="fixed top-0 left-0 right-0 bg-white shadow-2xl z-50 md:absolute md:top-12 md:right-0 md:w-96 md:rounded-2xl md:border border-gray-200"
+              className="fixed top-0 left-0 right-0 bg-white shadow-2xl z-[70] md:absolute md:top-14 md:right-0 md:w-96 md:rounded-2xl md:border md:border-gray-200 md:shadow-xl"
             >
               <form onSubmit={handleSearch} className="p-4">
                 <div className="relative">
