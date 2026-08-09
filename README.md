@@ -24,7 +24,7 @@ flowchart LR
   Browser[React SPA] --> API[Express API]
   API --> DB[MongoDB]
   API --> Upload[Image pipeline]
-  Upload --> Cloudinary[Cloudinary (optional)]
+  Upload --> Cloudinary[Cloudinary]
 ```
 
 
